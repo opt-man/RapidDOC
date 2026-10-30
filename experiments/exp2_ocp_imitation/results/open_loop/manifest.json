@@ -1,0 +1,690 @@
+{
+  "command": "run",
+  "problems": [
+    "cartpole",
+    "quadrotor",
+    "robotarm"
+  ],
+  "methods": [
+    "Ours",
+    "SafePDP",
+    "CasADi",
+    "acados"
+  ],
+  "casadi_active_tolerance": 1e-06,
+  "acados_root": null,
+  "acados_template_dir": null,
+  "acados_cache_dir": null,
+  "N": 40,
+  "dt": 0.05,
+  "train_demos": 32,
+  "validation_demos": 16,
+  "seeds": [
+    2
+  ],
+  "data_seed": 20260905,
+  "epochs": 800,
+  "learning_rate": 0.002,
+  "closed_loop_epochs": 500,
+  "closed_loop_steps": 50,
+  "closed_loop_learning_rate": 0.001,
+  "tolerance": 1e-06,
+  "forward_tolerance": 1e-08,
+  "teacher_tolerance": 1e-10,
+  "max_iterations": 200,
+  "forward_max_iterations": 500,
+  "validation_every": 20,
+  "print_every": 20,
+  "dataset_dir": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\results\\imitation_dataset_N40_dt005_v1",
+  "output_dir": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\results\\imitation_open_N40_dt005_seed2_v1",
+  "regenerate": false,
+  "reuse_frozen_far": false,
+  "overwrite": false,
+  "resume": true,
+  "checkpoint_every": 20,
+  "quick": false,
+  "no_plot": false,
+  "protocol": "nonlinear-imitation-v5-moderate-initials",
+  "numpy": "2.5.2",
+  "casadi": "3.8.0",
+  "backend_runtime": {
+    "cartpole/Ours": {
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "forward_timer": "private FATROP numerical call-site counters",
+      "binaries": {
+        "imitation_native.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\imitation_native.dll",
+          "sha256": "b7a6a5ddf28f2016edd0a5bf05dbe6ce0db8d9d9e5c6d28c3f841f3ec8ef3355"
+        },
+        "fatrop.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\fatrop.dll",
+          "sha256": "898197d0fdea5997667f1c102bc5635066489b4780c7033118cbfd80d1b79d83"
+        },
+        "factor_reuse_solver.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\factor_reuse_solver.dll",
+          "sha256": "86358f931d9cd1941dd2429093907639edfa3756b4dee0c81ae5abf1fcb1e4c8"
+        }
+      },
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "cartpole/SafePDP": {
+      "kernel_protocol": "mumps-numeric-and-pd-arithmetic-v4",
+      "casadi_version": "3.8.0",
+      "casadi_git_revision": "83b3cec864e42c5b64a07e85d4adf91da71458b1",
+      "ipopt_version": "3.14.19",
+      "compiler": "g++.exe (Rev5, Built by MSYS2 project) 5.3.0",
+      "compiler_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\mingw5\\Library\\mingw-w64\\bin",
+      "casadi_source_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\casadi-source",
+      "casadi_core_sha256": "2946a15fc1f08ae13a02b4483d865c681fc99ef6138b3e2429fbebc6b22e4ec2",
+      "library_sha256": {
+        "libfrs_casadi_ipopt_v4.dll": "0bd94fac428a5dfc2546069374c50c360b4b3638103e6fd17fdeeb63a72ed10b",
+        "libcasadi_nlpsol_ipopt_frs_v4.dll": "57d9bd6251a5ab3e9bee4c516bbdb7e3964b60dbfe4d531443bbb656defb4fe9"
+      },
+      "source_sha256": {
+        "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+        "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e",
+        "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+        "third_party/ipopt-highres/src/LinAlg/IpVector.hpp": "581f78c93ca59c027e6dfd1ef3bbfe14d22d7a4eac5176bee286bd4dfb620fb4",
+        "third_party/ipopt-highres/src/LinAlg/IpDenseVector.cpp": "435941e2b4c1e39274399b0fc6a4fe74d2a513f4b611069d30f1ad89ef741f16",
+        "third_party/ipopt-highres/src/LinAlg/IpCompoundVector.cpp": "4166bd22fb1ef63a040256b4767d9a96adaaaee42cef6d88e2387514bdb5f223",
+        "third_party/ipopt-highres/src/LinAlg/IpMatrix.cpp": "59b9f8ce3003c5555f57251778977d3ece2f9bfacdff41fb7f9d0a89a42e23b8",
+        "third_party/ipopt-highres/src/LinAlg/IpExpansionMatrix.cpp": "e46e9ea3cb01c4ae5bb0a0d5bfc4f8f1e821209ebc6924ffd1dc1c684eb0487a",
+        "third_party/ipopt-highres/src/LinAlg/IpIdentityMatrix.cpp": "59310bde417c15fda6fa7409d8ba7744a9c9f06bf78c194cb4121005912ef8be",
+        "third_party/ipopt-highres/src/LinAlg/IpScaledMatrix.cpp": "fa446db08e85ba81d30b5368cf5b49ea7b689c7483e507db1b92652606380290",
+        "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+        "cmake/casadi_ipopt_v4/CMakeLists.txt": "6c401a7e70432881a5071da33c00a036ce4011aed4874ae1459ba735dbcc8ac8",
+        "cmake/casadi_ipopt_v4/config.h": "f621db893e0462795cd50ec57a3f7ef5a2115a8623fc8c255af535023f7f9b8d",
+        "cmake/casadi_ipopt_v4/casadi_nlpsol_ipopt_export.h": "330ba4b461ee5070f5b2c45f170b502449dcdbf98803b339873cdf501b04233f"
+      },
+      "numerical_dependency_sha256": {
+        "libcoinmumps-3.dll": "0b80e04ab36acba9527a48744d20fbf95591707710b829d0e5e5eb525adee362",
+        "libcoinmetis-2.dll": "b63b9852704322d9f58edc59e093e4471dc76f96fc8bced63499ff40f5dbe8fb",
+        "libcasadi-tp-openblas.dll": "d061ba2e707c65c3d0d78236238d8483154b8e4c684a28ebfc9c2f00dabd258e"
+      },
+      "casadi_interface_source_sha256": {
+        "ipopt_interface.cpp": "6ff8071f59ab0452731c9c7bf61b14fbaccbbdccfca3a4216c207400ad9f2b18",
+        "ipopt_interface.hpp": "8be0349df7b997facf1d6969e86b91545f3d66628fb99979d25b52217d4b9256",
+        "ipopt_interface_meta.cpp": "f1fe3f8d41b3bfa0841619dcc93dcd61a814c36dcd8670a34f53d55f00d59745",
+        "ipopt_nlp.cpp": "e45f56d17bb6397775516df912ad87519b929be3a536436d10905235dfbade77",
+        "ipopt_nlp.hpp": "1a59390ecb909abae4ba5032563ffdf149c84c31b7e0944598aa5060f0e05c1a",
+        "ipopt_runtime.hpp": "a4573418328718daff15ad43cd8650229c37624f16c39585e45b5992ebcc5cba"
+      },
+      "plugin": "ipopt_frs_v4",
+      "numerical_library_source": "unchanged installed CasADi wheel",
+      "kernel_categories": [
+        "numeric-factorization",
+        "backsolve",
+        "residual-arithmetic",
+        "reduction-arithmetic"
+      ],
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "cartpole/CasADi": {
+      "kernel_protocol": "mumps-numeric-and-pd-arithmetic-v4",
+      "casadi_version": "3.8.0",
+      "casadi_git_revision": "83b3cec864e42c5b64a07e85d4adf91da71458b1",
+      "ipopt_version": "3.14.19",
+      "compiler": "g++.exe (Rev5, Built by MSYS2 project) 5.3.0",
+      "compiler_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\mingw5\\Library\\mingw-w64\\bin",
+      "casadi_source_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\casadi-source",
+      "casadi_core_sha256": "2946a15fc1f08ae13a02b4483d865c681fc99ef6138b3e2429fbebc6b22e4ec2",
+      "library_sha256": {
+        "libfrs_casadi_ipopt_v4.dll": "0bd94fac428a5dfc2546069374c50c360b4b3638103e6fd17fdeeb63a72ed10b",
+        "libcasadi_nlpsol_ipopt_frs_v4.dll": "57d9bd6251a5ab3e9bee4c516bbdb7e3964b60dbfe4d531443bbb656defb4fe9"
+      },
+      "source_sha256": {
+        "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+        "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e",
+        "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+        "third_party/ipopt-highres/src/LinAlg/IpVector.hpp": "581f78c93ca59c027e6dfd1ef3bbfe14d22d7a4eac5176bee286bd4dfb620fb4",
+        "third_party/ipopt-highres/src/LinAlg/IpDenseVector.cpp": "435941e2b4c1e39274399b0fc6a4fe74d2a513f4b611069d30f1ad89ef741f16",
+        "third_party/ipopt-highres/src/LinAlg/IpCompoundVector.cpp": "4166bd22fb1ef63a040256b4767d9a96adaaaee42cef6d88e2387514bdb5f223",
+        "third_party/ipopt-highres/src/LinAlg/IpMatrix.cpp": "59b9f8ce3003c5555f57251778977d3ece2f9bfacdff41fb7f9d0a89a42e23b8",
+        "third_party/ipopt-highres/src/LinAlg/IpExpansionMatrix.cpp": "e46e9ea3cb01c4ae5bb0a0d5bfc4f8f1e821209ebc6924ffd1dc1c684eb0487a",
+        "third_party/ipopt-highres/src/LinAlg/IpIdentityMatrix.cpp": "59310bde417c15fda6fa7409d8ba7744a9c9f06bf78c194cb4121005912ef8be",
+        "third_party/ipopt-highres/src/LinAlg/IpScaledMatrix.cpp": "fa446db08e85ba81d30b5368cf5b49ea7b689c7483e507db1b92652606380290",
+        "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+        "cmake/casadi_ipopt_v4/CMakeLists.txt": "6c401a7e70432881a5071da33c00a036ce4011aed4874ae1459ba735dbcc8ac8",
+        "cmake/casadi_ipopt_v4/config.h": "f621db893e0462795cd50ec57a3f7ef5a2115a8623fc8c255af535023f7f9b8d",
+        "cmake/casadi_ipopt_v4/casadi_nlpsol_ipopt_export.h": "330ba4b461ee5070f5b2c45f170b502449dcdbf98803b339873cdf501b04233f"
+      },
+      "numerical_dependency_sha256": {
+        "libcoinmumps-3.dll": "0b80e04ab36acba9527a48744d20fbf95591707710b829d0e5e5eb525adee362",
+        "libcoinmetis-2.dll": "b63b9852704322d9f58edc59e093e4471dc76f96fc8bced63499ff40f5dbe8fb",
+        "libcasadi-tp-openblas.dll": "d061ba2e707c65c3d0d78236238d8483154b8e4c684a28ebfc9c2f00dabd258e"
+      },
+      "casadi_interface_source_sha256": {
+        "ipopt_interface.cpp": "6ff8071f59ab0452731c9c7bf61b14fbaccbbdccfca3a4216c207400ad9f2b18",
+        "ipopt_interface.hpp": "8be0349df7b997facf1d6969e86b91545f3d66628fb99979d25b52217d4b9256",
+        "ipopt_interface_meta.cpp": "f1fe3f8d41b3bfa0841619dcc93dcd61a814c36dcd8670a34f53d55f00d59745",
+        "ipopt_nlp.cpp": "e45f56d17bb6397775516df912ad87519b929be3a536436d10905235dfbade77",
+        "ipopt_nlp.hpp": "1a59390ecb909abae4ba5032563ffdf149c84c31b7e0944598aa5060f0e05c1a",
+        "ipopt_runtime.hpp": "a4573418328718daff15ad43cd8650229c37624f16c39585e45b5992ebcc5cba"
+      },
+      "plugin": "ipopt_frs_v4",
+      "numerical_library_source": "unchanged installed CasADi wheel",
+      "kernel_categories": [
+        "numeric-factorization",
+        "backsolve",
+        "residual-arithmetic",
+        "reduction-arithmetic"
+      ],
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "cartpole/acados": {
+      "adapter": "3b2887b7e837effa8fcb9babef33a96082cf607938d0f43c74165749c77f3d09",
+      "model": "1ffafb17810677b52635d8fcc609fe58ea3b5bec04c5f08ada60c0e43195eb86",
+      "library": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+      "library_sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+      "template": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\source\\interfaces\\acados_template\\acados_template\\__init__.py",
+      "casadi": "3.8.0",
+      "problem": "cartpole",
+      "N": 40,
+      "dt": 0.05,
+      "tolerance": 1e-08,
+      "max_iterations": 500,
+      "native_libraries": {
+        "acados.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa"
+        },
+        "frs_imitation_blasfeo.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_blasfeo.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08"
+        },
+        "frs_imitation_hpipm.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_hpipm.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+        }
+      },
+      "native_build": {
+        "status": "binary-hashes-verified",
+        "manifest_path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\build_manifest.json",
+        "manifest": {
+          "acados_version": "0.5.1",
+          "compiler": "MSVC 19.44.35226.0",
+          "generator": "Visual Studio 17 2022",
+          "build_type": "Release",
+          "platform": "x64",
+          "blasfeo_target": "GENERIC",
+          "hpipm_target": "GENERIC",
+          "openmp": false,
+          "linear_algebra": "HIGH_PERFORMANCE",
+          "matrix_format": "PANELMAJ",
+          "timing_protocol": "solve-kernels-v4",
+          "timing_boundary": "forward-and-backward-hpipm-kernels-only",
+          "capability": "frs_acados_hpipm_kernel_timer_enabled_v4",
+          "library_sha256": {
+            "acados.dll": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+            "frs_imitation_blasfeo.dll": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08",
+            "frs_imitation_hpipm.dll": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+          },
+          "source_directory": "D:\\Desktop\\new hugdoc\\.codex-tmp\\acados-0.5.1",
+          "source_common_sha256": "a4c5a841a62d2533b61f7e59c07b49a1266db991ed995ea04d768ec6a6d1e457",
+          "cmake_cache": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\build\\CMakeCache.txt",
+          "timer_count_categories": [
+            "factor",
+            "solve",
+            "residual",
+            "reduction",
+            "condensing",
+            "vector",
+            "forward",
+            "adjoint",
+            "ipm_control"
+          ],
+          "qp_call_counter": "frs_acados_solve_timer_qp_calls_v4"
+        }
+      },
+      "strict_hpipm_kernel_timer": true,
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "quadrotor/Ours": {
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "forward_timer": "private FATROP numerical call-site counters",
+      "binaries": {
+        "imitation_native.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\imitation_native.dll",
+          "sha256": "b7a6a5ddf28f2016edd0a5bf05dbe6ce0db8d9d9e5c6d28c3f841f3ec8ef3355"
+        },
+        "fatrop.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\fatrop.dll",
+          "sha256": "898197d0fdea5997667f1c102bc5635066489b4780c7033118cbfd80d1b79d83"
+        },
+        "factor_reuse_solver.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\factor_reuse_solver.dll",
+          "sha256": "86358f931d9cd1941dd2429093907639edfa3756b4dee0c81ae5abf1fcb1e4c8"
+        }
+      },
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "quadrotor/SafePDP": {
+      "kernel_protocol": "mumps-numeric-and-pd-arithmetic-v4",
+      "casadi_version": "3.8.0",
+      "casadi_git_revision": "83b3cec864e42c5b64a07e85d4adf91da71458b1",
+      "ipopt_version": "3.14.19",
+      "compiler": "g++.exe (Rev5, Built by MSYS2 project) 5.3.0",
+      "compiler_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\mingw5\\Library\\mingw-w64\\bin",
+      "casadi_source_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\casadi-source",
+      "casadi_core_sha256": "2946a15fc1f08ae13a02b4483d865c681fc99ef6138b3e2429fbebc6b22e4ec2",
+      "library_sha256": {
+        "libfrs_casadi_ipopt_v4.dll": "0bd94fac428a5dfc2546069374c50c360b4b3638103e6fd17fdeeb63a72ed10b",
+        "libcasadi_nlpsol_ipopt_frs_v4.dll": "57d9bd6251a5ab3e9bee4c516bbdb7e3964b60dbfe4d531443bbb656defb4fe9"
+      },
+      "source_sha256": {
+        "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+        "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e",
+        "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+        "third_party/ipopt-highres/src/LinAlg/IpVector.hpp": "581f78c93ca59c027e6dfd1ef3bbfe14d22d7a4eac5176bee286bd4dfb620fb4",
+        "third_party/ipopt-highres/src/LinAlg/IpDenseVector.cpp": "435941e2b4c1e39274399b0fc6a4fe74d2a513f4b611069d30f1ad89ef741f16",
+        "third_party/ipopt-highres/src/LinAlg/IpCompoundVector.cpp": "4166bd22fb1ef63a040256b4767d9a96adaaaee42cef6d88e2387514bdb5f223",
+        "third_party/ipopt-highres/src/LinAlg/IpMatrix.cpp": "59b9f8ce3003c5555f57251778977d3ece2f9bfacdff41fb7f9d0a89a42e23b8",
+        "third_party/ipopt-highres/src/LinAlg/IpExpansionMatrix.cpp": "e46e9ea3cb01c4ae5bb0a0d5bfc4f8f1e821209ebc6924ffd1dc1c684eb0487a",
+        "third_party/ipopt-highres/src/LinAlg/IpIdentityMatrix.cpp": "59310bde417c15fda6fa7409d8ba7744a9c9f06bf78c194cb4121005912ef8be",
+        "third_party/ipopt-highres/src/LinAlg/IpScaledMatrix.cpp": "fa446db08e85ba81d30b5368cf5b49ea7b689c7483e507db1b92652606380290",
+        "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+        "cmake/casadi_ipopt_v4/CMakeLists.txt": "6c401a7e70432881a5071da33c00a036ce4011aed4874ae1459ba735dbcc8ac8",
+        "cmake/casadi_ipopt_v4/config.h": "f621db893e0462795cd50ec57a3f7ef5a2115a8623fc8c255af535023f7f9b8d",
+        "cmake/casadi_ipopt_v4/casadi_nlpsol_ipopt_export.h": "330ba4b461ee5070f5b2c45f170b502449dcdbf98803b339873cdf501b04233f"
+      },
+      "numerical_dependency_sha256": {
+        "libcoinmumps-3.dll": "0b80e04ab36acba9527a48744d20fbf95591707710b829d0e5e5eb525adee362",
+        "libcoinmetis-2.dll": "b63b9852704322d9f58edc59e093e4471dc76f96fc8bced63499ff40f5dbe8fb",
+        "libcasadi-tp-openblas.dll": "d061ba2e707c65c3d0d78236238d8483154b8e4c684a28ebfc9c2f00dabd258e"
+      },
+      "casadi_interface_source_sha256": {
+        "ipopt_interface.cpp": "6ff8071f59ab0452731c9c7bf61b14fbaccbbdccfca3a4216c207400ad9f2b18",
+        "ipopt_interface.hpp": "8be0349df7b997facf1d6969e86b91545f3d66628fb99979d25b52217d4b9256",
+        "ipopt_interface_meta.cpp": "f1fe3f8d41b3bfa0841619dcc93dcd61a814c36dcd8670a34f53d55f00d59745",
+        "ipopt_nlp.cpp": "e45f56d17bb6397775516df912ad87519b929be3a536436d10905235dfbade77",
+        "ipopt_nlp.hpp": "1a59390ecb909abae4ba5032563ffdf149c84c31b7e0944598aa5060f0e05c1a",
+        "ipopt_runtime.hpp": "a4573418328718daff15ad43cd8650229c37624f16c39585e45b5992ebcc5cba"
+      },
+      "plugin": "ipopt_frs_v4",
+      "numerical_library_source": "unchanged installed CasADi wheel",
+      "kernel_categories": [
+        "numeric-factorization",
+        "backsolve",
+        "residual-arithmetic",
+        "reduction-arithmetic"
+      ],
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "quadrotor/CasADi": {
+      "kernel_protocol": "mumps-numeric-and-pd-arithmetic-v4",
+      "casadi_version": "3.8.0",
+      "casadi_git_revision": "83b3cec864e42c5b64a07e85d4adf91da71458b1",
+      "ipopt_version": "3.14.19",
+      "compiler": "g++.exe (Rev5, Built by MSYS2 project) 5.3.0",
+      "compiler_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\mingw5\\Library\\mingw-w64\\bin",
+      "casadi_source_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\casadi-source",
+      "casadi_core_sha256": "2946a15fc1f08ae13a02b4483d865c681fc99ef6138b3e2429fbebc6b22e4ec2",
+      "library_sha256": {
+        "libfrs_casadi_ipopt_v4.dll": "0bd94fac428a5dfc2546069374c50c360b4b3638103e6fd17fdeeb63a72ed10b",
+        "libcasadi_nlpsol_ipopt_frs_v4.dll": "57d9bd6251a5ab3e9bee4c516bbdb7e3964b60dbfe4d531443bbb656defb4fe9"
+      },
+      "source_sha256": {
+        "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+        "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e",
+        "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+        "third_party/ipopt-highres/src/LinAlg/IpVector.hpp": "581f78c93ca59c027e6dfd1ef3bbfe14d22d7a4eac5176bee286bd4dfb620fb4",
+        "third_party/ipopt-highres/src/LinAlg/IpDenseVector.cpp": "435941e2b4c1e39274399b0fc6a4fe74d2a513f4b611069d30f1ad89ef741f16",
+        "third_party/ipopt-highres/src/LinAlg/IpCompoundVector.cpp": "4166bd22fb1ef63a040256b4767d9a96adaaaee42cef6d88e2387514bdb5f223",
+        "third_party/ipopt-highres/src/LinAlg/IpMatrix.cpp": "59b9f8ce3003c5555f57251778977d3ece2f9bfacdff41fb7f9d0a89a42e23b8",
+        "third_party/ipopt-highres/src/LinAlg/IpExpansionMatrix.cpp": "e46e9ea3cb01c4ae5bb0a0d5bfc4f8f1e821209ebc6924ffd1dc1c684eb0487a",
+        "third_party/ipopt-highres/src/LinAlg/IpIdentityMatrix.cpp": "59310bde417c15fda6fa7409d8ba7744a9c9f06bf78c194cb4121005912ef8be",
+        "third_party/ipopt-highres/src/LinAlg/IpScaledMatrix.cpp": "fa446db08e85ba81d30b5368cf5b49ea7b689c7483e507db1b92652606380290",
+        "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+        "cmake/casadi_ipopt_v4/CMakeLists.txt": "6c401a7e70432881a5071da33c00a036ce4011aed4874ae1459ba735dbcc8ac8",
+        "cmake/casadi_ipopt_v4/config.h": "f621db893e0462795cd50ec57a3f7ef5a2115a8623fc8c255af535023f7f9b8d",
+        "cmake/casadi_ipopt_v4/casadi_nlpsol_ipopt_export.h": "330ba4b461ee5070f5b2c45f170b502449dcdbf98803b339873cdf501b04233f"
+      },
+      "numerical_dependency_sha256": {
+        "libcoinmumps-3.dll": "0b80e04ab36acba9527a48744d20fbf95591707710b829d0e5e5eb525adee362",
+        "libcoinmetis-2.dll": "b63b9852704322d9f58edc59e093e4471dc76f96fc8bced63499ff40f5dbe8fb",
+        "libcasadi-tp-openblas.dll": "d061ba2e707c65c3d0d78236238d8483154b8e4c684a28ebfc9c2f00dabd258e"
+      },
+      "casadi_interface_source_sha256": {
+        "ipopt_interface.cpp": "6ff8071f59ab0452731c9c7bf61b14fbaccbbdccfca3a4216c207400ad9f2b18",
+        "ipopt_interface.hpp": "8be0349df7b997facf1d6969e86b91545f3d66628fb99979d25b52217d4b9256",
+        "ipopt_interface_meta.cpp": "f1fe3f8d41b3bfa0841619dcc93dcd61a814c36dcd8670a34f53d55f00d59745",
+        "ipopt_nlp.cpp": "e45f56d17bb6397775516df912ad87519b929be3a536436d10905235dfbade77",
+        "ipopt_nlp.hpp": "1a59390ecb909abae4ba5032563ffdf149c84c31b7e0944598aa5060f0e05c1a",
+        "ipopt_runtime.hpp": "a4573418328718daff15ad43cd8650229c37624f16c39585e45b5992ebcc5cba"
+      },
+      "plugin": "ipopt_frs_v4",
+      "numerical_library_source": "unchanged installed CasADi wheel",
+      "kernel_categories": [
+        "numeric-factorization",
+        "backsolve",
+        "residual-arithmetic",
+        "reduction-arithmetic"
+      ],
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "quadrotor/acados": {
+      "adapter": "3b2887b7e837effa8fcb9babef33a96082cf607938d0f43c74165749c77f3d09",
+      "model": "1ffafb17810677b52635d8fcc609fe58ea3b5bec04c5f08ada60c0e43195eb86",
+      "library": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+      "library_sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+      "template": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\source\\interfaces\\acados_template\\acados_template\\__init__.py",
+      "casadi": "3.8.0",
+      "problem": "quadrotor",
+      "N": 40,
+      "dt": 0.05,
+      "tolerance": 1e-08,
+      "max_iterations": 500,
+      "native_libraries": {
+        "acados.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa"
+        },
+        "frs_imitation_blasfeo.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_blasfeo.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08"
+        },
+        "frs_imitation_hpipm.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_hpipm.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+        }
+      },
+      "native_build": {
+        "status": "binary-hashes-verified",
+        "manifest_path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\build_manifest.json",
+        "manifest": {
+          "acados_version": "0.5.1",
+          "compiler": "MSVC 19.44.35226.0",
+          "generator": "Visual Studio 17 2022",
+          "build_type": "Release",
+          "platform": "x64",
+          "blasfeo_target": "GENERIC",
+          "hpipm_target": "GENERIC",
+          "openmp": false,
+          "linear_algebra": "HIGH_PERFORMANCE",
+          "matrix_format": "PANELMAJ",
+          "timing_protocol": "solve-kernels-v4",
+          "timing_boundary": "forward-and-backward-hpipm-kernels-only",
+          "capability": "frs_acados_hpipm_kernel_timer_enabled_v4",
+          "library_sha256": {
+            "acados.dll": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+            "frs_imitation_blasfeo.dll": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08",
+            "frs_imitation_hpipm.dll": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+          },
+          "source_directory": "D:\\Desktop\\new hugdoc\\.codex-tmp\\acados-0.5.1",
+          "source_common_sha256": "a4c5a841a62d2533b61f7e59c07b49a1266db991ed995ea04d768ec6a6d1e457",
+          "cmake_cache": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\build\\CMakeCache.txt",
+          "timer_count_categories": [
+            "factor",
+            "solve",
+            "residual",
+            "reduction",
+            "condensing",
+            "vector",
+            "forward",
+            "adjoint",
+            "ipm_control"
+          ],
+          "qp_call_counter": "frs_acados_solve_timer_qp_calls_v4"
+        }
+      },
+      "strict_hpipm_kernel_timer": true,
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "robotarm/Ours": {
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "forward_timer": "private FATROP numerical call-site counters",
+      "binaries": {
+        "imitation_native.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\imitation_native.dll",
+          "sha256": "b7a6a5ddf28f2016edd0a5bf05dbe6ce0db8d9d9e5c6d28c3f841f3ec8ef3355"
+        },
+        "fatrop.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\fatrop.dll",
+          "sha256": "898197d0fdea5997667f1c102bc5635066489b4780c7033118cbfd80d1b79d83"
+        },
+        "factor_reuse_solver.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\factor_reuse_solver.dll",
+          "sha256": "86358f931d9cd1941dd2429093907639edfa3756b4dee0c81ae5abf1fcb1e4c8"
+        }
+      },
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "robotarm/SafePDP": {
+      "kernel_protocol": "mumps-numeric-and-pd-arithmetic-v4",
+      "casadi_version": "3.8.0",
+      "casadi_git_revision": "83b3cec864e42c5b64a07e85d4adf91da71458b1",
+      "ipopt_version": "3.14.19",
+      "compiler": "g++.exe (Rev5, Built by MSYS2 project) 5.3.0",
+      "compiler_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\mingw5\\Library\\mingw-w64\\bin",
+      "casadi_source_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\casadi-source",
+      "casadi_core_sha256": "2946a15fc1f08ae13a02b4483d865c681fc99ef6138b3e2429fbebc6b22e4ec2",
+      "library_sha256": {
+        "libfrs_casadi_ipopt_v4.dll": "0bd94fac428a5dfc2546069374c50c360b4b3638103e6fd17fdeeb63a72ed10b",
+        "libcasadi_nlpsol_ipopt_frs_v4.dll": "57d9bd6251a5ab3e9bee4c516bbdb7e3964b60dbfe4d531443bbb656defb4fe9"
+      },
+      "source_sha256": {
+        "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+        "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e",
+        "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+        "third_party/ipopt-highres/src/LinAlg/IpVector.hpp": "581f78c93ca59c027e6dfd1ef3bbfe14d22d7a4eac5176bee286bd4dfb620fb4",
+        "third_party/ipopt-highres/src/LinAlg/IpDenseVector.cpp": "435941e2b4c1e39274399b0fc6a4fe74d2a513f4b611069d30f1ad89ef741f16",
+        "third_party/ipopt-highres/src/LinAlg/IpCompoundVector.cpp": "4166bd22fb1ef63a040256b4767d9a96adaaaee42cef6d88e2387514bdb5f223",
+        "third_party/ipopt-highres/src/LinAlg/IpMatrix.cpp": "59b9f8ce3003c5555f57251778977d3ece2f9bfacdff41fb7f9d0a89a42e23b8",
+        "third_party/ipopt-highres/src/LinAlg/IpExpansionMatrix.cpp": "e46e9ea3cb01c4ae5bb0a0d5bfc4f8f1e821209ebc6924ffd1dc1c684eb0487a",
+        "third_party/ipopt-highres/src/LinAlg/IpIdentityMatrix.cpp": "59310bde417c15fda6fa7409d8ba7744a9c9f06bf78c194cb4121005912ef8be",
+        "third_party/ipopt-highres/src/LinAlg/IpScaledMatrix.cpp": "fa446db08e85ba81d30b5368cf5b49ea7b689c7483e507db1b92652606380290",
+        "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+        "cmake/casadi_ipopt_v4/CMakeLists.txt": "6c401a7e70432881a5071da33c00a036ce4011aed4874ae1459ba735dbcc8ac8",
+        "cmake/casadi_ipopt_v4/config.h": "f621db893e0462795cd50ec57a3f7ef5a2115a8623fc8c255af535023f7f9b8d",
+        "cmake/casadi_ipopt_v4/casadi_nlpsol_ipopt_export.h": "330ba4b461ee5070f5b2c45f170b502449dcdbf98803b339873cdf501b04233f"
+      },
+      "numerical_dependency_sha256": {
+        "libcoinmumps-3.dll": "0b80e04ab36acba9527a48744d20fbf95591707710b829d0e5e5eb525adee362",
+        "libcoinmetis-2.dll": "b63b9852704322d9f58edc59e093e4471dc76f96fc8bced63499ff40f5dbe8fb",
+        "libcasadi-tp-openblas.dll": "d061ba2e707c65c3d0d78236238d8483154b8e4c684a28ebfc9c2f00dabd258e"
+      },
+      "casadi_interface_source_sha256": {
+        "ipopt_interface.cpp": "6ff8071f59ab0452731c9c7bf61b14fbaccbbdccfca3a4216c207400ad9f2b18",
+        "ipopt_interface.hpp": "8be0349df7b997facf1d6969e86b91545f3d66628fb99979d25b52217d4b9256",
+        "ipopt_interface_meta.cpp": "f1fe3f8d41b3bfa0841619dcc93dcd61a814c36dcd8670a34f53d55f00d59745",
+        "ipopt_nlp.cpp": "e45f56d17bb6397775516df912ad87519b929be3a536436d10905235dfbade77",
+        "ipopt_nlp.hpp": "1a59390ecb909abae4ba5032563ffdf149c84c31b7e0944598aa5060f0e05c1a",
+        "ipopt_runtime.hpp": "a4573418328718daff15ad43cd8650229c37624f16c39585e45b5992ebcc5cba"
+      },
+      "plugin": "ipopt_frs_v4",
+      "numerical_library_source": "unchanged installed CasADi wheel",
+      "kernel_categories": [
+        "numeric-factorization",
+        "backsolve",
+        "residual-arithmetic",
+        "reduction-arithmetic"
+      ],
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "robotarm/CasADi": {
+      "kernel_protocol": "mumps-numeric-and-pd-arithmetic-v4",
+      "casadi_version": "3.8.0",
+      "casadi_git_revision": "83b3cec864e42c5b64a07e85d4adf91da71458b1",
+      "ipopt_version": "3.14.19",
+      "compiler": "g++.exe (Rev5, Built by MSYS2 project) 5.3.0",
+      "compiler_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\mingw5\\Library\\mingw-w64\\bin",
+      "casadi_source_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\casadi-source",
+      "casadi_core_sha256": "2946a15fc1f08ae13a02b4483d865c681fc99ef6138b3e2429fbebc6b22e4ec2",
+      "library_sha256": {
+        "libfrs_casadi_ipopt_v4.dll": "0bd94fac428a5dfc2546069374c50c360b4b3638103e6fd17fdeeb63a72ed10b",
+        "libcasadi_nlpsol_ipopt_frs_v4.dll": "57d9bd6251a5ab3e9bee4c516bbdb7e3964b60dbfe4d531443bbb656defb4fe9"
+      },
+      "source_sha256": {
+        "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+        "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e",
+        "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+        "third_party/ipopt-highres/src/LinAlg/IpVector.hpp": "581f78c93ca59c027e6dfd1ef3bbfe14d22d7a4eac5176bee286bd4dfb620fb4",
+        "third_party/ipopt-highres/src/LinAlg/IpDenseVector.cpp": "435941e2b4c1e39274399b0fc6a4fe74d2a513f4b611069d30f1ad89ef741f16",
+        "third_party/ipopt-highres/src/LinAlg/IpCompoundVector.cpp": "4166bd22fb1ef63a040256b4767d9a96adaaaee42cef6d88e2387514bdb5f223",
+        "third_party/ipopt-highres/src/LinAlg/IpMatrix.cpp": "59b9f8ce3003c5555f57251778977d3ece2f9bfacdff41fb7f9d0a89a42e23b8",
+        "third_party/ipopt-highres/src/LinAlg/IpExpansionMatrix.cpp": "e46e9ea3cb01c4ae5bb0a0d5bfc4f8f1e821209ebc6924ffd1dc1c684eb0487a",
+        "third_party/ipopt-highres/src/LinAlg/IpIdentityMatrix.cpp": "59310bde417c15fda6fa7409d8ba7744a9c9f06bf78c194cb4121005912ef8be",
+        "third_party/ipopt-highres/src/LinAlg/IpScaledMatrix.cpp": "fa446db08e85ba81d30b5368cf5b49ea7b689c7483e507db1b92652606380290",
+        "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+        "cmake/casadi_ipopt_v4/CMakeLists.txt": "6c401a7e70432881a5071da33c00a036ce4011aed4874ae1459ba735dbcc8ac8",
+        "cmake/casadi_ipopt_v4/config.h": "f621db893e0462795cd50ec57a3f7ef5a2115a8623fc8c255af535023f7f9b8d",
+        "cmake/casadi_ipopt_v4/casadi_nlpsol_ipopt_export.h": "330ba4b461ee5070f5b2c45f170b502449dcdbf98803b339873cdf501b04233f"
+      },
+      "numerical_dependency_sha256": {
+        "libcoinmumps-3.dll": "0b80e04ab36acba9527a48744d20fbf95591707710b829d0e5e5eb525adee362",
+        "libcoinmetis-2.dll": "b63b9852704322d9f58edc59e093e4471dc76f96fc8bced63499ff40f5dbe8fb",
+        "libcasadi-tp-openblas.dll": "d061ba2e707c65c3d0d78236238d8483154b8e4c684a28ebfc9c2f00dabd258e"
+      },
+      "casadi_interface_source_sha256": {
+        "ipopt_interface.cpp": "6ff8071f59ab0452731c9c7bf61b14fbaccbbdccfca3a4216c207400ad9f2b18",
+        "ipopt_interface.hpp": "8be0349df7b997facf1d6969e86b91545f3d66628fb99979d25b52217d4b9256",
+        "ipopt_interface_meta.cpp": "f1fe3f8d41b3bfa0841619dcc93dcd61a814c36dcd8670a34f53d55f00d59745",
+        "ipopt_nlp.cpp": "e45f56d17bb6397775516df912ad87519b929be3a536436d10905235dfbade77",
+        "ipopt_nlp.hpp": "1a59390ecb909abae4ba5032563ffdf149c84c31b7e0944598aa5060f0e05c1a",
+        "ipopt_runtime.hpp": "a4573418328718daff15ad43cd8650229c37624f16c39585e45b5992ebcc5cba"
+      },
+      "plugin": "ipopt_frs_v4",
+      "numerical_library_source": "unchanged installed CasADi wheel",
+      "kernel_categories": [
+        "numeric-factorization",
+        "backsolve",
+        "residual-arithmetic",
+        "reduction-arithmetic"
+      ],
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    },
+    "robotarm/acados": {
+      "adapter": "3b2887b7e837effa8fcb9babef33a96082cf607938d0f43c74165749c77f3d09",
+      "model": "1ffafb17810677b52635d8fcc609fe58ea3b5bec04c5f08ada60c0e43195eb86",
+      "library": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+      "library_sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+      "template": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\source\\interfaces\\acados_template\\acados_template\\__init__.py",
+      "casadi": "3.8.0",
+      "problem": "robotarm",
+      "N": 40,
+      "dt": 0.05,
+      "tolerance": 1e-08,
+      "max_iterations": 500,
+      "native_libraries": {
+        "acados.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa"
+        },
+        "frs_imitation_blasfeo.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_blasfeo.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08"
+        },
+        "frs_imitation_hpipm.dll": {
+          "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_hpipm.dll",
+          "path_source": "loaded Windows module",
+          "sha256": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+        }
+      },
+      "native_build": {
+        "status": "binary-hashes-verified",
+        "manifest_path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\build_manifest.json",
+        "manifest": {
+          "acados_version": "0.5.1",
+          "compiler": "MSVC 19.44.35226.0",
+          "generator": "Visual Studio 17 2022",
+          "build_type": "Release",
+          "platform": "x64",
+          "blasfeo_target": "GENERIC",
+          "hpipm_target": "GENERIC",
+          "openmp": false,
+          "linear_algebra": "HIGH_PERFORMANCE",
+          "matrix_format": "PANELMAJ",
+          "timing_protocol": "solve-kernels-v4",
+          "timing_boundary": "forward-and-backward-hpipm-kernels-only",
+          "capability": "frs_acados_hpipm_kernel_timer_enabled_v4",
+          "library_sha256": {
+            "acados.dll": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+            "frs_imitation_blasfeo.dll": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08",
+            "frs_imitation_hpipm.dll": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+          },
+          "source_directory": "D:\\Desktop\\new hugdoc\\.codex-tmp\\acados-0.5.1",
+          "source_common_sha256": "a4c5a841a62d2533b61f7e59c07b49a1266db991ed995ea04d768ec6a6d1e457",
+          "cmake_cache": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\build\\CMakeCache.txt",
+          "timer_count_categories": [
+            "factor",
+            "solve",
+            "residual",
+            "reduction",
+            "condensing",
+            "vector",
+            "forward",
+            "adjoint",
+            "ipm_control"
+          ],
+          "qp_call_counter": "frs_acados_solve_timer_qp_calls_v4"
+        }
+      },
+      "strict_hpipm_kernel_timer": true,
+      "native_diagnostic_timing_protocol": "solve-kernels-v4",
+      "reported_timing_protocol": "solver-call-only-v1"
+    }
+  },
+  "python": "3.13.12 | packaged by conda-forge | (main, Feb  5 2026, 05:41:12) [MSC v.1944 64 bit (AMD64)]",
+  "timing_warmups": 0,
+  "threads": 1,
+  "cpu_affinity_logical_cpu": 0,
+  "imitation_loss": "half squared state-control trajectory error; mean over demonstrations only",
+  "parameter_initialization": "identical across methods for each seed",
+  "forward_initialization": "previous trajectory for the same sample; common first guess",
+  "backward": "backend-native sensitivities; scalar-loss contraction; closed loop also differentiates first control",
+  "dataset_sha256": {
+    "cartpole": "349bb09d31bbf1547fe96429723ad4c6e3553a0205ffe6ea90e0650e4473eb4b",
+    "quadrotor": "e3afa90519fe15547ad9f442da5ef129ac216e737d061be66ac2c7906b1b2ae4",
+    "robotarm": "cd6e445a420d0d2b11885adf9e0b029cbce2664308afbe92bf32b14d5814765a"
+  },
+  "source_sha256": {
+    "imitation_learning.py": "296317268ec245469aa467f0f56424918bb6e8e5025c2e1f5f581e94dcfa488f",
+    "imitation_models.py": "1ffafb17810677b52635d8fcc609fe58ea3b5bec04c5f08ada60c0e43195eb86",
+    "imitation_native.cpp": "7a496daa962e10cebf84931285c8dc6d1722e75cb4e74abc209395023577b82f",
+    "imitation_sipopt.cpp": "6f12ac2b08ba08e5e8d327de2b24c5fed64511c23c192bfbd9b3e5e426f08d9e",
+    "imitation_casadi.py": "d069e30528dee86ac3db45ce2ce774bd65789370a31bbc8d6baa260bab30d3d9",
+    "imitation_ipopt_timing.py": "a296e2709073d42e75cac455fd2c237ee88accc40ec03289b666fcdea24e1fd2",
+    "imitation_acados.py": "3b2887b7e837effa8fcb9babef33a96082cf607938d0f43c74165749c77f3d09",
+    "third_party/Safe-PDP/SafePDP/SafePDP.py": "5356d391f946cfeeafb344983dea72ea6cf8e82ff4ca1160aafa5c896a3b752e",
+    "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+    "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+    "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+    "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e"
+  },
+  "closed_loop_gradient": "mean trajectory loss differentiated through all MPC state transitions; full-rollout-v1",
+  "closed_loop_warm_start": "shifted solution from the previous MPC step",
+  "safepdp": "COCsys.ocSolver, getAuxSys, EQCLQR; rank and constrained-policy algebra fixes",
+  "sipopt": "official native Ipopt and sIPOPT; external certification excluded from training timing",
+  "casadi_baseline": "native nlpsol(ipopt).reverse(1) graph with equivalent QR node rebound for timing; explicit state/control/obstacle inequalities",
+  "casadi_linear_timer": "stock-linsol-record-time: t_wall_nfact + t_wall_solve; one graph solve per reverse seed; numeric kernel boundaries match v3 hooks, clock implementation differs",
+  "acados_baseline": "SQP/HPIPM forward and exact unregularized sensitivity solve; iterate transfer excluded and sensitivity factorization counted in backward_ms",
+  "acados_forward_configuration": "EXACT Hessian, MIRROR regularization, FIXED_STEP; PARTIAL_CONDENSING_HPIPM cond_N=N; unit stage cost scaling",
+  "acados_private_build": "MSVC x64; BLASFEO/HPIPM GENERIC; OpenMP OFF; see build_imitation_acados.ps1 (external runtime overrides must document their own build)",
+  "safepdp_forward_timer": "CasADi nlpsol t_wall_total; excludes per-call NLP construction and nlpsol creation",
+  "timing_platform": "win32",
+  "timing_protocol": "solver-call-only-v1",
+  "timing_revision": "solver-call-only-20260914",
+  "timing_reference": "backend-internal nominal and sensitivity solver invocations",
+  "timing_forward": "native nominal-solver invocation only; CasADi-based methods use nlpsol t_wall_total",
+  "timing_backward": "native adjoint or sensitivity-solver invocation only",
+  "timing_total": "forward_ms + backward_ms; same paired calls",
+  "timing_excludes": "problem/graph construction, nlpsol creation, target and cache preparation, independent residual certification, gradient contraction, optimizer update, validation, teacher generation, disk IO, and plotting",
+  "safepdp_backward_timer": "EQCLQR.eqctlqrSolver wall time; getAuxSys, configuration, and contraction excluded",
+  "numerical_kernel_diagnostics": "target_ms, cache_ms, linear_ms, and contraction_ms remain diagnostic subcomponents; reported backward_ms uses the complete internal solver invocation"
+}

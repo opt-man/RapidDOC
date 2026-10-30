@@ -1,0 +1,50 @@
+{
+  "protocol": "gmres-real-ocp-factor-reuse-ablation-v5-target-refactor",
+  "problems": [
+    "cartpole",
+    "quadrotor",
+    "robotarm"
+  ],
+  "instances_per_problem": 32,
+  "methods": [
+    "Ours",
+    "Target refactor",
+    "No-reuse GMRES"
+  ],
+  "cases_dir": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\results\\factor_reuse_ablation_cases_32",
+  "timing_warmups": 0,
+  "repeats": 1,
+  "tolerance": 1e-06,
+  "requested_max_iterations": 0,
+  "iteration_policy": "target KKT dimension",
+  "effective_max_iterations": {
+    "cartpole": 278,
+    "quadrotor": 1424,
+    "robotarm": 358
+  },
+  "threads": 1,
+  "timing_boundary": "frozen-target-post-forward-linear-solve-v2",
+  "accuracy_reference": "CasADi 3.8.0 sparse MUMPS direct solve; untimed",
+  "accuracy_metrics": [
+    "independently certified relative target-KKT residual",
+    "relative adjoint error against CasADi--MUMPS"
+  ],
+  "comparison_policy": "summaries are emitted only if all timed methods reach the same requested relative-residual tolerance on every case",
+  "timing_alignment": "post-forward adjoint linear algebra with zero timing warmups; Target refactor includes its required exact-target factorization",
+  "excluded_from_timing": [
+    "forward",
+    "case IO",
+    "CasADi--MUMPS accuracy reference",
+    "startup",
+    "target construction because frozen target arrays are inputs",
+    "one-time Ours and No-reuse handle/workspace construction"
+  ],
+  "included_in_timing": [
+    "cached initialization",
+    "preconditioner applications",
+    "GMRES",
+    "target residual checks",
+    "numerical vector operations",
+    "Target-refactor handle construction, exact-target generalized Riccati factorization, and direct solve"
+  ]
+}

@@ -1,0 +1,853 @@
+diff --git a/include/fatrop/ip_algorithm/ip_resto_phase_min_cl1.hxx b/include/fatrop/ip_algorithm/ip_resto_phase_min_cl1.hxx
+index e10e0f9..1ee9cfd 100644
+--- a/include/fatrop/ip_algorithm/ip_resto_phase_min_cl1.hxx
++++ b/include/fatrop/ip_algorithm/ip_resto_phase_min_cl1.hxx
+@@ -19,6 +19,7 @@
+ #include "fatrop/ip_algorithm/ip_iterate.hpp"
+ #include "fatrop/ip_algorithm/ip_nlp_resto.hpp"
+ #include "fatrop/ip_algorithm/ip_resto_phase_min_cl1.hpp"
++#include <cmath>
+ 
+ namespace fatrop
+ {
+@@ -42,7 +43,7 @@ namespace fatrop
+         // todo make sure that step info is set just before restoration phase is called in line
+         const ProblemInfoType &info = curr_it_orig.info();
+         ip_nlp_resto_->set_xs_reference(info, curr_it_orig.primal_x(), curr_it_orig.primal_s());
+-        ip_nlp_resto_->set_zeta(sqrt(curr_it_orig.mu()));
++        ip_nlp_resto_->set_zeta(std::sqrt(curr_it_orig.mu()));
+         // search
+         curr_it_resto.step_info() = curr_it_orig.step_info();
+         IpSolverReturnFlag resto_status = resto_ip_algorithm_->optimize(true);
+diff --git a/include/fatrop/ip_algorithm/ip_timings.hpp b/include/fatrop/ip_algorithm/ip_timings.hpp
+index 2ec4d8e..a1d852c 100644
+--- a/include/fatrop/ip_algorithm/ip_timings.hpp
++++ b/include/fatrop/ip_algorithm/ip_timings.hpp
+@@ -80,6 +80,14 @@ namespace fatrop
+     struct ScopedTimer
+     {
+         ScopedTimer(Timer &t, IpTimingStatistics &s)
++#ifdef FATROP_DISABLE_FINE_TIMINGS
++            : timer_(nullptr), prev_(nullptr), stats_(nullptr)
++        {
++            (void)t;
++            (void)s;
++        }
++        ~ScopedTimer() = default;
++#else
+             : timer_(&t), prev_(s.active_), stats_(&s)
+         {
+             if (prev_)
+@@ -94,6 +102,7 @@ namespace fatrop
+             if (prev_)
+                 prev_->start();
+         }
++#endif
+         ScopedTimer(const ScopedTimer &) = delete;
+         ScopedTimer &operator=(const ScopedTimer &) = delete;
+ 
+diff --git a/include/fatrop/linear_algebra/matrix.hpp b/include/fatrop/linear_algebra/matrix.hpp
+index 2f31c5c..9b70ad3 100644
+--- a/include/fatrop/linear_algebra/matrix.hpp
++++ b/include/fatrop/linear_algebra/matrix.hpp
+@@ -359,7 +359,7 @@ namespace fatrop
+          *
+          * @param other The MatRealAllocated object to move from.
+          */
+-        inline MatRealAllocated(MatRealAllocated &&other);
++        inline MatRealAllocated(MatRealAllocated &&other) noexcept;
+ 
+         template <typename Derived>
+         MatRealAllocated(const MatReal<Derived> &mat_in) : MatRealAllocated(mat_in.m(), mat_in.n())
+@@ -490,7 +490,7 @@ namespace fatrop
+         std::memset(mat_.mem, 0, mat_.memsize * sizeof(char));
+     }
+ 
+-    MatRealAllocated::MatRealAllocated(MatRealAllocated &&other)
++    MatRealAllocated::MatRealAllocated(MatRealAllocated &&other) noexcept
+         : MatRealView(*this, other.m(), other.n(), 0, 0), mat_(other.mat_)
+     {
+         // Nullify the moved-from object's mat_ to prevent double deletion
+diff --git a/include/fatrop/ocp/aug_system_solver.hpp b/include/fatrop/ocp/aug_system_solver.hpp
+index 20f5774..b9d48ef 100644
+--- a/include/fatrop/ocp/aug_system_solver.hpp
++++ b/include/fatrop/ocp/aug_system_solver.hpp
+@@ -11,6 +11,9 @@
+ #include "fatrop/ocp/fwd.hpp"
+ #include "fatrop/linear_algebra/linear_solver_return_flags.hpp"
+ #include "fatrop/common/options.hpp"
++#include "fatrop/ocp/hessian.hpp"
++#include "fatrop/ocp/jacobian.hpp"
++#include "fatrop/ocp/problem_info.hpp"
+ #include <vector>
+ 
+ namespace fatrop
+@@ -144,6 +147,19 @@ namespace fatrop
+                                    const VecRealView &D_s, const VecRealView &f,
+                                    const VecRealView &g, VecRealView &x, VecRealView &eq_mult);
+ 
++        bool export_rhs_factors(const ProblemInfo<OcpType> &info,
++                                Scalar *value_hessians,
++                                Scalar *control_cholesky,
++                                Scalar *cross_factors) const;
++
++        bool export_factor_cache(const ProblemInfo<OcpType> &info,
++                                 Scalar *forward_hessians,
++                                 Scalar *terminal_hessian,
++                                 Scalar *dynamics,
++                                 Scalar *value_hessians,
++                                 Scalar *control_cholesky,
++                                 Scalar *cross_factors) const;
++
+         /**
+          * @brief Registers the solver options with the provided options registry.
+          * @param registry The options registry to register with.
+@@ -159,6 +175,13 @@ namespace fatrop
+         void set_increased_accuracy(const bool &value) { increased_accuracy = value; }
+ 
+     private:
++        void capture_factor_cache(const ProblemInfo<OcpType> &info,
++                                  const Jacobian<OcpType> &jacobian,
++                                  const Hessian<OcpType> &hessian,
++                                  const VecRealView &D_x,
++                                  const VecRealView *D_eq,
++                                  const VecRealView &D_s);
++
+         // temporaries, pre-allocated during construction to avoid allocation during
+         // optimization
+         std::vector<MatRealAllocated> Ppt;
+@@ -201,6 +224,10 @@ namespace fatrop
+         std::vector<PermutationMatrix> PrI;
+         std::vector<Index> gamma;
+         std::vector<Index> rho;
++        std::vector<Scalar> cached_forward_hessians_;
++        std::vector<Scalar> cached_terminal_hessian_;
++        std::vector<Scalar> cached_dynamics_;
++        bool factor_cache_valid_ = false;
+         Index rankI = 0;
+         bool it_ref = true;
+         bool perturbed_mode = false;
+diff --git a/include/fatrop/ocp/fwd.hpp b/include/fatrop/ocp/fwd.hpp
+index 1ca0612..42b18af 100644
+--- a/include/fatrop/ocp/fwd.hpp
++++ b/include/fatrop/ocp/fwd.hpp
+@@ -7,7 +7,7 @@
+ 
+ namespace fatrop
+ {
+-    class OcpType;
++    struct OcpType;
+     template <typename T> struct ProblemDims;
+     template <> struct ProblemDims<OcpType>;
+     template <typename T> struct ProblemInfo;
+@@ -16,7 +16,7 @@ namespace fatrop
+     template <> struct Jacobian<OcpType>;
+     template <typename T> struct Hessian;
+     template <> struct Hessian<OcpType>;
+-    template <typename T> struct PdSolverOrig;
++    template <typename T> class PdSolverOrig;
+     template <> class PdSolverOrig<OcpType>;
+     template <typename ProblemType> class AugSystemSolver;
+     template <> class AugSystemSolver<OcpType>;
+@@ -28,4 +28,4 @@ namespace fatrop
+     template <> class PdSolverResto<OcpType>;
+ } // namespace fatrop
+ 
+-#endif // __fatrop_ocp_fwd_hpp__
+\ No newline at end of file
++#endif // __fatrop_ocp_fwd_hpp__
+diff --git a/include/fatrop/ocp/pd_solver_orig.hpp b/include/fatrop/ocp/pd_solver_orig.hpp
+index 6095159..1ff794f 100644
+--- a/include/fatrop/ocp/pd_solver_orig.hpp
++++ b/include/fatrop/ocp/pd_solver_orig.hpp
+@@ -8,8 +8,11 @@
+ 
+ #include "fatrop/linear_algebra/fwd.hpp"
+ #include "fatrop/ip_algorithm/pd_solver_orig.hpp"
++#include "fatrop/ocp/hessian.hpp"
++#include "fatrop/ocp/jacobian.hpp"
+ #include "fatrop/ocp/fwd.hpp"
+ #include "fatrop/ocp/pd_system_orig.hpp"
++#include "fatrop/ocp/problem_info.hpp"
+ #include "fatrop/ocp/type.hpp"
+ #include <memory>
+ 
+@@ -25,8 +28,29 @@ namespace fatrop
+         void reduce(LinearSystem<PdSystemType<OcpType>> &ls);
+         void dereduce(LinearSystem<PdSystemType<OcpType>> &ls, VecRealView &x);
+         void solve_rhs_impl(LinearSystem<PdSystemType<OcpType>> &ls, VecRealView &x);
++        /** Solve the last factorized reduced augmented system without exporting
++         *  its Riccati factors. rhs_f and rhs_g are algebraic right-hand sides
++         *  of [H A^T; A -D] [x; lambda] = [rhs_f; rhs_g]. The method is valid
++         *  after solve_once_impl() has produced the current factorization. */
++        bool solve_cached_reduced_rhs(const Scalar *rhs_f, const Scalar *rhs_g,
++                                      Scalar *x, Scalar *mult);
++        bool solve_cached_reduced_rhs_batch(const Scalar *rhs_f,
++                                            const Scalar *rhs_g, int nrhs,
++                                            Scalar *x, Scalar *mult);
++        bool export_rhs_factors(const ProblemInfo<OcpType> &info,
++                                Scalar *value_hessians,
++                                Scalar *control_cholesky,
++                                Scalar *cross_factors) const;
++        bool export_factor_cache(const ProblemInfo<OcpType> &info,
++                                 Scalar *forward_hessians,
++                                 Scalar *terminal_hessian,
++                                 Scalar *dynamics,
++                                 Scalar *value_hessians,
++                                 Scalar *control_cholesky,
++                                 Scalar *cross_factors) const;
+ 
+     private:
++        void bind_rhs_cache(LinearSystem<PdSystemType<OcpType>> &ls);
+         VecRealAllocated sigma_inverse_;
+         VecRealAllocated ss_;
+         VecRealAllocated g_ii_;
+@@ -34,6 +58,14 @@ namespace fatrop
+         VecRealAllocated gg_;
+         VecRealAllocated x_aug_;
+         VecRealAllocated mult_aug_;
++        VecRealAllocated cached_rhs_f_;
++        VecRealAllocated cached_rhs_g_;
++        const ProblemInfo<OcpType> *cached_info_ = nullptr;
++        const Jacobian<OcpType> *cached_jacobian_ = nullptr;
++        const Hessian<OcpType> *cached_hessian_ = nullptr;
++        VecRealAllocated cached_D_eq_;
++        bool rhs_cache_valid_ = false;
++        bool cached_has_D_eq_ = false;
+         std::shared_ptr<AugSystemSolver<OcpType>> aug_system_solver_;
+     };
+ 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 46e858e..3652c05 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -32,71 +32,18 @@ set(FATROP_SOURCES
+     ip_algorithm/ip_filter.cpp
+     ip_algorithm/ip_mu_update.cpp
+     ip_algorithm/ip_utils.cpp
+-    dense/dims.cpp
+-    dense/problem_info.cpp
+-    dense/jacobian.cpp
+-    dense/hessian.cpp
+-    dense/aug_system_solver.cpp
+-    dense/pd_system_orig.cpp
+-    dense/pd_solver_orig.cpp
+-    dense/pd_system_resto.cpp
+-    dense/pd_solver_resto.cpp
+-    dense/nlp_dense.cpp
+-    dense/ip_alg_builder.cpp
+-    dense/ip_algorithm.cpp
+-    dense/ip_convergence_check.cpp
+-    dense/ip_convergence_check_resto.cpp
+-    dense/ip_data.cpp
+-    dense/ip_eq_mult_initializer.cpp
+-    dense/ip_initializer.cpp
+-    dense/ip_initializer_resto.cpp
+-    dense/ip_iterate.cpp
+-    dense/ip_iteration_output.cpp
+-    dense/ip_iteration_output_resto.cpp
+-    dense/ip_linesearch.cpp
+-    dense/ip_mu_update.cpp
+-    dense/ip_nlp_orig.cpp
+-    dense/ip_nlp_resto.cpp
+-    dense/ip_resto_phase_min_cl1.cpp
+-    dense/ip_search_dir.cpp
+-    dense/mehrotra_qp.cpp
+-    graph/block_sparsity.cpp
+-    graph/block_pd_matrix.cpp
+-    graph/linear_system.cpp
+-    graph/elimination_order.cpp
+-    graph/symbolic_factorization.cpp
+-    graph/linear_solver.cpp
+-    graph/dims.cpp
+-    graph/problem_info.cpp
+-    graph/hessian.cpp
+-    graph/jacobian.cpp
+-    graph/nlp_graph.cpp
+-    graph/aug_system_solver.cpp
+-    graph/pd_system_orig.cpp
+-    graph/pd_solver_orig.cpp
+-    graph/pd_system_resto.cpp
+-    graph/pd_solver_resto.cpp
+-    graph/ip_iterate.cpp
+-    graph/ip_data.cpp
+-    graph/ip_nlp_orig.cpp
+-    graph/ip_nlp_resto.cpp
+-    graph/ip_search_dir.cpp
+-    graph/ip_linesearch.cpp
+-    graph/ip_mu_update.cpp
+-    graph/ip_convergence_check.cpp
+-    graph/ip_convergence_check_resto.cpp
+-    graph/ip_iteration_output.cpp
+-    graph/ip_iteration_output_resto.cpp
+-    graph/ip_eq_mult_initializer.cpp
+-    graph/ip_initializer.cpp
+-    graph/ip_initializer_resto.cpp
+-    graph/ip_resto_phase_min_cl1.cpp
+-    graph/ip_algorithm.cpp
+-    graph/ip_alg_builder.cpp
+ )
+ 
+ # Create the fatrop shared library
+ add_library(fatrop SHARED ${FATROP_SOURCES})
++option(FATROP_BUILD_EXTENDED_BACKENDS
++    "Include the existing dense/graph implementations required by their tests" OFF)
++if(FATROP_BUILD_EXTENDED_BACKENDS)
++    file(GLOB FATROP_EXTENDED_SOURCES CONFIGURE_DEPENDS
++        "${CMAKE_CURRENT_SOURCE_DIR}/dense/*.cpp"
++        "${CMAKE_CURRENT_SOURCE_DIR}/graph/*.cpp")
++    target_sources(fatrop PRIVATE ${FATROP_EXTENDED_SOURCES})
++endif()
+ target_compile_definitions(fatrop PRIVATE FATROP_VERSION="${PROJECT_VERSION}")
+ 
+ # Set properties for the fatrop target
+diff --git a/src/linear_algebra/lu_factorization.cpp b/src/linear_algebra/lu_factorization.cpp
+index c880459..4d58ca8 100644
+--- a/src/linear_algebra/lu_factorization.cpp
++++ b/src/linear_algebra/lu_factorization.cpp
+@@ -5,6 +5,7 @@
+ #include "fatrop/common/exception.hpp"
+ #include "fatrop/linear_algebra/linear_algebra.hpp"
+ #include <algorithm>
++#include <cmath>
+ #include <utility>
+ 
+ namespace fatrop
+@@ -53,14 +54,14 @@ namespace fatrop
+         std::pair<Index, Index> max_indices{ai, aj};
+ 
+         // Set the initial maximum value to the absolute value at the starting position
+-        double max_value = abs(blasfeo_matel_wrap(matr, ai, aj));
++        double max_value = std::abs(blasfeo_matel_wrap(matr, ai, aj));
+ 
+         // Iterate over the submatrix to find the maximum element
+         for (Index col = aj; col < n; ++col)
+         {
+             for (Index row = ai; row < m; ++row)
+             {
+-                double current_value = abs(blasfeo_matel_wrap(matr, row, col));
++                double current_value = std::abs(blasfeo_matel_wrap(matr, row, col));
+                 if (current_value > max_value)
+                 {
+                     max_value = current_value;
+@@ -84,7 +85,7 @@ namespace fatrop
+         for (Index i = 0; i < minmn; i++)
+         {
+             std::pair<Index, Index> max_curr = max_el(n_max, m, At, i, i);
+-            if (abs(blasfeo_matel_wrap(At, max_curr.first, max_curr.second)) < tol)
++            if (std::abs(blasfeo_matel_wrap(At, max_curr.first, max_curr.second)) < tol)
+             {
+                 break;
+             }
+diff --git a/src/ocp/aug_system_solver.cpp b/src/ocp/aug_system_solver.cpp
+index a438d5c..eb8642c 100644
+--- a/src/ocp/aug_system_solver.cpp
++++ b/src/ocp/aug_system_solver.cpp
+@@ -122,12 +122,123 @@ void AugSystemSolver<OcpType>::register_options(OptionRegistry &registry)
+     registry.register_option("linsol_increased_accuracy", &AugSystemSolver<OcpType>::set_increased_accuracy, this);
+ }
+ 
++void AugSystemSolver<OcpType>::capture_factor_cache(
++    const ProblemInfo<OcpType> &info, const Jacobian<OcpType> &jacobian,
++    const Hessian<OcpType> &hessian, const VecRealView &D_x,
++    const VecRealView *D_eq, const VecRealView &D_s)
++{
++    factor_cache_valid_ = false;
++    cached_forward_hessians_.clear();
++    cached_terminal_hessian_.clear();
++    cached_dynamics_.clear();
++    if (info.dims.K <= 1)
++        return;
++
++    const Index horizon = info.dims.K - 1;
++    const Index nx = info.dims.number_of_tangent_states[0];
++    const Index nu = info.dims.number_of_tangent_controls[0];
++    const Index stage_dim = nx + nu;
++    if (info.dims.number_of_tangent_controls[horizon] != 0)
++        return;
++    for (Index k = 0; k < info.dims.K; ++k)
++    {
++        if (info.dims.number_of_tangent_states[k] != nx)
++            return;
++        if (k < horizon && info.dims.number_of_tangent_controls[k] != nu)
++            return;
++    }
++
++    cached_forward_hessians_.resize(
++        static_cast<std::size_t>(horizon) * stage_dim * stage_dim);
++    cached_terminal_hessian_.resize(static_cast<std::size_t>(nx) * nx);
++    cached_dynamics_.resize(
++        static_cast<std::size_t>(horizon) * nx * stage_dim);
++
++    const auto reduced_hessian_entry =
++        [&](Index k, Index row, Index column) -> Scalar
++    {
++        const Index lower_row = row > column ? row : column;
++        const Index lower_column = row < column ? row : column;
++        Scalar value = hessian.RSQrqt[k](lower_row, lower_column);
++        if (row == column)
++            value += D_x(info.offsets_tangent_u[k] + row);
++
++        const Index ng_ineq = info.dims.number_of_ineq_constraints[k];
++        const Index slack_offset = info.offsets_slack[k];
++        for (Index i = 0; i < ng_ineq; ++i)
++            value += jacobian.Gg_ineqt[k](row, i) *
++                     jacobian.Gg_ineqt[k](column, i) /
++                     D_s(slack_offset + i);
++
++        if (D_eq != nullptr)
++        {
++            const Index ng_eq = info.dims.number_of_eq_constraints[k];
++            const Index eq_offset = info.offsets_eq[k];
++            for (Index i = 0; i < ng_eq; ++i)
++                value += jacobian.Gg_eqt[k](row, i) *
++                         jacobian.Gg_eqt[k](column, i) /
++                         (*D_eq)(eq_offset + i);
++        }
++        return value;
++    };
++
++    for (Index k = 0; k < horizon; ++k)
++    {
++        for (Index external_row = 0; external_row < stage_dim; ++external_row)
++        {
++            const Index internal_row =
++                external_row < nx ? nu + external_row : external_row - nx;
++            for (Index external_column = 0; external_column <= external_row;
++                 ++external_column)
++            {
++                const Index internal_column = external_column < nx
++                                                  ? nu + external_column
++                                                  : external_column - nx;
++                const Scalar value =
++                    reduced_hessian_entry(k, internal_row, internal_column);
++                const std::size_t row_offset =
++                    (static_cast<std::size_t>(k) * stage_dim + external_row) *
++                    stage_dim;
++                const std::size_t column_offset =
++                    (static_cast<std::size_t>(k) * stage_dim + external_column) *
++                    stage_dim;
++                cached_forward_hessians_[row_offset + external_column] = value;
++                cached_forward_hessians_[column_offset + external_row] = value;
++            }
++        }
++
++        for (Index row = 0; row < nx; ++row)
++        {
++            const std::size_t row_offset =
++                (static_cast<std::size_t>(k) * nx + row) * stage_dim;
++            for (Index column = 0; column < nx; ++column)
++                cached_dynamics_[row_offset + column] =
++                    -jacobian.BAbt[k](nu + column, row);
++            for (Index column = 0; column < nu; ++column)
++                cached_dynamics_[row_offset + nx + column] =
++                    -jacobian.BAbt[k](column, row);
++        }
++    }
++
++    for (Index row = 0; row < nx; ++row)
++        for (Index column = 0; column <= row; ++column)
++        {
++            const Scalar value = reduced_hessian_entry(horizon, row, column);
++            cached_terminal_hessian_[static_cast<std::size_t>(row) * nx +
++                                     column] = value;
++            cached_terminal_hessian_[static_cast<std::size_t>(column) * nx +
++                                     row] = value;
++        }
++    factor_cache_valid_ = true;
++}
++
+ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &info,
+                                            Jacobian<OcpType> &jacobian, Hessian<OcpType> &hessian,
+                                            const VecRealView &D_x, const VecRealView &D_s,
+                                            const VecRealView &f, const VecRealView &g,
+                                            VecRealView &x, VecRealView &eq_mult)
+ {
++    factor_cache_valid_ = false;
+     MatRealView *RSQrq_hat_curr_p;
+     Index rank_k;
+     /////////////// recursion ///////////////
+@@ -437,12 +548,15 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
+             gemv_t(nu + nx, rho_k, -1.0, RSQrqt_tilde[k], 0, 0, x, offs, 1.0, eq_mult, offs_g_k,
+                    eq_mult, offs_g_k);
+             // nu-rank_k+nx,0
+-            // needless copy because feature not implemented yet in trsv_lnn
+-            gecp(rho_k, gamma_k, Ggt_tilde[k], nu - rho_k + nx + 1, 0, AL[0], 0, 0);
++            // Copy to an aligned temporary block; the generic BLASFEO backend
++            // is faster here than triangular solves on the shifted source.
++            gecp(rho_k, gamma_k, Ggt_tilde[k], nu - rho_k + nx + 1, 0,
++                 AL[0], 0, 0);
+             // U^-T
+             trsv_lnn(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
+             // L^-T
+-            trsv_unu(rho_k, gamma_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
++            trsv_unu(rho_k, gamma_k, AL[0], 0, 0, eq_mult, offs_g_k,
++                     eq_mult, offs_g_k);
+             Pl[k].apply_inverse(rho_k, &eq_mult.vec(), offs_g_k);
+             Pr[k].apply_inverse(rho_k, &x.vec(), offs);
+         }
+@@ -474,6 +588,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
+                    offs_dyn_eq_k, eq_mult, offs_dyn_eq_k);
+         }
+     }
++    capture_factor_cache(info, jacobian, hessian, D_x, nullptr, D_s);
+     return LinsolReturnFlag::SUCCESS;
+ }
+ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &info,
+@@ -483,6 +598,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
+                                            const VecRealView &g, VecRealView &x,
+                                            VecRealView &eq_mult)
+ {
++    factor_cache_valid_ = false;
+     MatRealView *RSQrq_hat_curr_p;
+     for (Index k = info.dims.K - 1; k >= 0; --k)
+     {
+@@ -563,8 +679,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
+             // Pp_k = Qq_hatk - L_k^T @ Ll_k
+             // SYRK_LN_MN(nx+1, nx, nu-rank_k, -1.0,Llt_p+k, nu-rank_k,0, Llt_p+k, nu-rank_k,0, 1.0,
+             // RSQrq_hat_curr_p, nu-rank_k, nu-rank_k,Pp+k,0,0); // feature not implmented yet
+-            gecp(nx + 1, nu, Llt[k], nu, 0, Llt_shift[0], 0,
+-                 0); // needless operation because feature not implemented yet
++            gecp(nx + 1, nu, Llt[k], nu, 0, Llt_shift[0], 0, 0);
+             syrk_ln_mn(nx + 1, nx, nu, -1.0, Llt_shift[0], 0, 0, Llt_shift[0], 0, 0, 1.0,
+                        *RSQrq_hat_curr_p, nu, nu, Ppt[k], 0, 0);
+         }
+@@ -635,6 +750,7 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve(const ProblemInfo<OcpType> &inf
+                 eq_mult.block(ng_ineq, offs_eq_ineq) / D_s.block(ng_ineq, offs_slack);
+         }
+     }
++    capture_factor_cache(info, jacobian, hessian, D_x, &D_eq, D_s);
+     return LinsolReturnFlag::SUCCESS;
+ }
+ 
+@@ -841,9 +957,11 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType>
+             veccpsc(rho_k, -1.0, v_RSQrqt_tilde[k], 0, eq_mult, offs_g_k);
+             gemv_t(nu + nx, rho_k, -1.0, RSQrqt_tilde[k], 0, 0, x, offs, 1.0, eq_mult, offs_g_k,
+                    eq_mult, offs_g_k);
+-            gecp(rho_k, gamma_k, Ggt_tilde[k], nu - rho_k + nx + 1, 0, AL[0], 0, 0);
++            gecp(rho_k, gamma_k, Ggt_tilde[k], nu - rho_k + nx + 1, 0,
++                 AL[0], 0, 0);
+             trsv_lnn(rho_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
+-            trsv_unu(rho_k, gamma_k, AL[0], 0, 0, eq_mult, offs_g_k, eq_mult, offs_g_k);
++            trsv_unu(rho_k, gamma_k, AL[0], 0, 0, eq_mult, offs_g_k,
++                     eq_mult, offs_g_k);
+             Pl[k].apply_inverse(rho_k, &eq_mult.vec(), offs_g_k);
+             Pr[k].apply_inverse(rho_k, &x.vec(), offs);
+         }
+@@ -875,6 +993,59 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType>
+     }
+     return LinsolReturnFlag::SUCCESS;
+ }
++
++bool AugSystemSolver<OcpType>::export_rhs_factors(
++    const ProblemInfo<OcpType> &info, Scalar *value_hessians,
++    Scalar *control_cholesky, Scalar *cross_factors) const
++{
++    if (value_hessians == nullptr || control_cholesky == nullptr ||
++        cross_factors == nullptr || info.dims.K <= 0)
++        return false;
++
++    const Index nx = info.dims.number_of_tangent_states[0];
++    const Index nu = info.dims.number_of_tangent_controls[0];
++    for (Index k = 0; k < info.dims.K; ++k)
++    {
++        if (info.dims.number_of_tangent_states[k] != nx)
++            return false;
++        if (k + 1 < info.dims.K &&
++            (info.dims.number_of_tangent_controls[k] != nu || rho[k] != 0))
++            return false;
++        for (Index i = 0; i < nx; ++i)
++            for (Index j = 0; j < nx; ++j)
++                value_hessians[(k * nx + i) * nx + j] = Ppt[k](i, j);
++
++        if (k + 1 == info.dims.K)
++            continue;
++        for (Index i = 0; i < nu; ++i)
++            for (Index j = 0; j < nu; ++j)
++                control_cholesky[(k * nu + i) * nu + j] = Llt[k](i, j);
++        for (Index i = 0; i < nx; ++i)
++            for (Index j = 0; j < nu; ++j)
++                cross_factors[(k * nx + i) * nu + j] = Llt[k](nu + i, j);
++    }
++    return true;
++}
++
++bool AugSystemSolver<OcpType>::export_factor_cache(
++    const ProblemInfo<OcpType> &info, Scalar *forward_hessians,
++    Scalar *terminal_hessian, Scalar *dynamics, Scalar *value_hessians,
++    Scalar *control_cholesky, Scalar *cross_factors) const
++{
++    if (!factor_cache_valid_ || forward_hessians == nullptr ||
++        terminal_hessian == nullptr || dynamics == nullptr)
++        return false;
++    if (!export_rhs_factors(info, value_hessians, control_cholesky,
++                            cross_factors))
++        return false;
++    for (std::size_t i = 0; i < cached_forward_hessians_.size(); ++i)
++        forward_hessians[i] = cached_forward_hessians_[i];
++    for (std::size_t i = 0; i < cached_terminal_hessian_.size(); ++i)
++        terminal_hessian[i] = cached_terminal_hessian_[i];
++    for (std::size_t i = 0; i < cached_dynamics_.size(); ++i)
++        dynamics[i] = cached_dynamics_[i];
++    return true;
++}
+ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType> &info,
+                                                const Jacobian<OcpType> &jacobian,
+                                                const Hessian<OcpType> &hessian,
+@@ -1009,4 +1180,4 @@ LinsolReturnFlag AugSystemSolver<OcpType>::solve_rhs(const ProblemInfo<OcpType>
+         }
+     }
+     return LinsolReturnFlag::SUCCESS;
+-}
+\ No newline at end of file
++}
+diff --git a/src/ocp/ip_alg_builder.cpp b/src/ocp/ip_alg_builder.cpp
+index 33380a4..cea522c 100644
+--- a/src/ocp/ip_alg_builder.cpp
++++ b/src/ocp/ip_alg_builder.cpp
+@@ -14,5 +14,9 @@
+ 
+ namespace fatrop
+ {
++#if defined(_WIN32)
++    template class __declspec(dllexport) IpAlgBuilder<OcpType>;
++#else
+     template class IpAlgBuilder<OcpType>;
++#endif
+ } // namespace fatrop
+diff --git a/src/ocp/ip_algorithm.cpp b/src/ocp/ip_algorithm.cpp
+index 8a9019b..beb57ed 100644
+--- a/src/ocp/ip_algorithm.cpp
++++ b/src/ocp/ip_algorithm.cpp
+@@ -5,4 +5,8 @@
+ #include "fatrop/ocp/jacobian.hpp"
+ #include "fatrop/ocp/problem_info.hpp"
+ 
+-template class fatrop::IpAlgorithm<fatrop::OcpType>;
+\ No newline at end of file
++#if defined(_WIN32)
++template class __declspec(dllexport) fatrop::IpAlgorithm<fatrop::OcpType>;
++#else
++template class fatrop::IpAlgorithm<fatrop::OcpType>;
++#endif
+diff --git a/src/ocp/ip_data.cpp b/src/ocp/ip_data.cpp
+index 218202b..ef1e5f9 100644
+--- a/src/ocp/ip_data.cpp
++++ b/src/ocp/ip_data.cpp
+@@ -7,5 +7,9 @@
+ #include "fatrop/ocp/hessian.hpp"
+ 
+ using namespace fatrop;
+-// explicit template instantiation
+-template class fatrop::IpData<OcpType>; 
+\ No newline at end of file
++// Export the concrete OCP instantiation used by shared-library clients.
++#if defined(_WIN32)
++template class __declspec(dllexport) fatrop::IpData<OcpType>;
++#else
++template class fatrop::IpData<OcpType>;
++#endif
+diff --git a/src/ocp/ip_iterate.cpp b/src/ocp/ip_iterate.cpp
+index 440ca04..30411bb 100644
+--- a/src/ocp/ip_iterate.cpp
++++ b/src/ocp/ip_iterate.cpp
+@@ -8,4 +8,8 @@ using namespace fatrop;
+ // specializations
+ template <> const VecRealView IpIterate<OcpType>::constr_viol_ineq() { return constr_viol().block(info_->number_of_g_eq_slack, info_->offset_g_eq_slack); }
+ // explicit template instantiation
+-template class fatrop::IpIterate<OcpType>;
+\ No newline at end of file
++#if defined(_WIN32)
++template class __declspec(dllexport) fatrop::IpIterate<OcpType>;
++#else
++template class fatrop::IpIterate<OcpType>;
++#endif
+diff --git a/src/ocp/nlp_ocp.cpp b/src/ocp/nlp_ocp.cpp
+index 2e27bc3..47a019e 100644
+--- a/src/ocp/nlp_ocp.cpp
++++ b/src/ocp/nlp_ocp.cpp
+@@ -1,4 +1,8 @@
+ #include "fatrop/ocp/nlp_ocp.hxx"
+ using namespace fatrop;
+ // explicit template instantiation
+-template class fatrop::NlpOcpTpl<OcpAbstractDynamic>; 
+\ No newline at end of file
++#if defined(_WIN32)
++template class __declspec(dllexport) fatrop::NlpOcpTpl<OcpAbstractDynamic>;
++#else
++template class fatrop::NlpOcpTpl<OcpAbstractDynamic>;
++#endif
+diff --git a/src/ocp/pd_solver_orig.cpp b/src/ocp/pd_solver_orig.cpp
+index e4349fb..c9fc6cb 100644
+--- a/src/ocp/pd_solver_orig.cpp
++++ b/src/ocp/pd_solver_orig.cpp
+@@ -19,9 +19,28 @@ PdSolverOrig<OcpType>::PdSolverOrig(const ProblemInfo<OcpType> &info,
+       sigma_inverse_(info.number_of_slack_variables), ss_(info.number_of_slack_variables),
+       g_ii_(info.number_of_slack_variables), D_ii_(info.number_of_slack_variables),
+       gg_(info.number_of_eq_constraints), x_aug_(info.number_of_tangent_variables),
+-      mult_aug_(info.number_of_eq_constraints), aug_system_solver_(aug_system_solver)
++      mult_aug_(info.number_of_eq_constraints),
++      cached_rhs_f_(info.number_of_tangent_variables),
++      cached_rhs_g_(info.number_of_eq_constraints),
++      cached_D_eq_(info.number_of_g_eq_path),
++      aug_system_solver_(aug_system_solver)
+ {
+ }
++
++void PdSolverOrig<OcpType>::bind_rhs_cache(
++    LinearSystem<PdSystemType<OcpType>> &ls)
++{
++    rhs_cache_valid_ = false;
++    cached_info_ = &ls.info_;
++    cached_jacobian_ = &ls.jac_;
++    cached_hessian_ = &ls.hess_;
++    cached_has_D_eq_ = !ls.De_is_zero_;
++    if (cached_has_D_eq_)
++        cached_D_eq_ = ls.D_e_.block(
++            ls.info_.number_of_g_eq_path, ls.info_.offset_g_eq_path);
++    else
++        cached_D_eq_ = 0.0;
++}
+ void PdSolverOrig<OcpType>::reduce(LinearSystem<PdSystemType<OcpType>> &ls)
+ {
+     VecRealView gi =
+@@ -96,6 +115,7 @@ LinsolReturnFlag PdSolverOrig<OcpType>::solve_once_impl(LinearSystem<PdSystemTyp
+     //  This system is in the Augmented system form and can be solved by AugSystemSolver<OcpType>
+     // call aug_system_solver to solve the system
+     reduce(ls);
++    bind_rhs_cache(ls);
+     LinsolReturnFlag ret;
+     if (ls.De_is_zero_)
+         ret = aug_system_solver_->solve(ls.info_, ls.jac_, ls.hess_, ls.D_x_, D_ii_, ls.rhs_f_x_,
+@@ -103,6 +123,7 @@ LinsolReturnFlag PdSolverOrig<OcpType>::solve_once_impl(LinearSystem<PdSystemTyp
+     else
+         ret = aug_system_solver_->solve(ls.info_, ls.jac_, ls.hess_, ls.D_x_, ls.D_e_.block(ls.info_.number_of_g_eq_path, ls.info_.offset_g_eq_path), D_ii_,
+                                         ls.rhs_f_x_, gg_, x_aug_, mult_aug_);
++    rhs_cache_valid_ = ret == LinsolReturnFlag::SUCCESS;
+     dereduce(ls, x);
+     return ret;
+ }
+@@ -116,4 +137,121 @@ void PdSolverOrig<OcpType>::solve_rhs_impl(LinearSystem<PdSystemType<OcpType>> &
+         aug_system_solver_->solve_rhs(ls.info_, ls.jac_, ls.hess_, ls.D_e_.block(ls.info_.number_of_g_eq_path, ls.info_.offset_g_eq_path), D_ii_, ls.rhs_f_x_, gg_,
+                                       x_aug_, mult_aug_);
+     dereduce(ls, x);
+-}
+\ No newline at end of file
++}
++
++bool PdSolverOrig<OcpType>::solve_cached_reduced_rhs(
++    const Scalar *rhs_f, const Scalar *rhs_g, Scalar *x, Scalar *mult)
++{
++    if (rhs_f == nullptr || rhs_g == nullptr || x == nullptr ||
++        mult == nullptr || !rhs_cache_valid_ || cached_info_ == nullptr ||
++        cached_jacobian_ == nullptr || cached_hessian_ == nullptr)
++        return false;
++
++    // AugSystemSolver uses residual vectors f,g and solves K z = -[f;g].
++    // Negating here gives this public entry point the conventional K z = rhs
++    // semantics used by the differentiable backward solver.
++    for (Index i = 0; i < cached_rhs_f_.m(); ++i)
++        cached_rhs_f_(i) = -rhs_f[i];
++    for (Index i = 0; i < cached_rhs_g_.m(); ++i)
++        cached_rhs_g_(i) = -rhs_g[i];
++
++    const LinsolReturnFlag status = cached_has_D_eq_
++        ? aug_system_solver_->solve_rhs(
++              *cached_info_, *cached_jacobian_, *cached_hessian_, cached_D_eq_,
++              D_ii_, cached_rhs_f_, cached_rhs_g_, x_aug_, mult_aug_)
++        : aug_system_solver_->solve_rhs(
++              *cached_info_, *cached_jacobian_, *cached_hessian_, D_ii_,
++              cached_rhs_f_, cached_rhs_g_, x_aug_, mult_aug_);
++    if (status != LinsolReturnFlag::SUCCESS)
++        return false;
++
++    for (Index i = 0; i < x_aug_.m(); ++i)
++        x[i] = x_aug_(i);
++    for (Index i = 0; i < mult_aug_.m(); ++i)
++        mult[i] = mult_aug_(i);
++    return x_aug_.is_finite() && mult_aug_.is_finite();
++}
++
++bool PdSolverOrig<OcpType>::solve_cached_reduced_rhs_batch(
++    const Scalar *rhs_f, const Scalar *rhs_g, int nrhs, Scalar *x,
++    Scalar *mult)
++{
++    if (rhs_f == nullptr || rhs_g == nullptr || x == nullptr ||
++        mult == nullptr || nrhs <= 0)
++        return false;
++
++    const Index nf = cached_rhs_f_.m();
++    const Index ng = cached_rhs_g_.m();
++    for (int column = 0; column < nrhs; ++column)
++        if (!solve_cached_reduced_rhs(
++                rhs_f + static_cast<std::size_t>(column) * nf,
++                rhs_g + static_cast<std::size_t>(column) * ng,
++                x + static_cast<std::size_t>(column) * nf,
++                mult + static_cast<std::size_t>(column) * ng))
++            return false;
++    return true;
++}
++
++bool PdSolverOrig<OcpType>::export_rhs_factors(
++    const ProblemInfo<OcpType> &info, Scalar *value_hessians,
++    Scalar *control_cholesky, Scalar *cross_factors) const
++{
++    return aug_system_solver_->export_rhs_factors(
++        info, value_hessians, control_cholesky, cross_factors);
++}
++
++bool PdSolverOrig<OcpType>::export_factor_cache(
++    const ProblemInfo<OcpType> &info, Scalar *forward_hessians,
++    Scalar *terminal_hessian, Scalar *dynamics, Scalar *value_hessians,
++    Scalar *control_cholesky, Scalar *cross_factors) const
++{
++    return aug_system_solver_->export_factor_cache(
++        info, forward_hessians, terminal_hessian, dynamics, value_hessians,
++        control_cholesky, cross_factors);
++}
++
++// Stable DLL entry point for the experiment driver. A C++ decorated name is
++// compiler-version dependent and must not be used with GetProcAddress.
++#if defined(_WIN32)
++extern "C" __declspec(dllexport)
++#else
++extern "C" __attribute__((visibility("default")))
++#endif
++bool fatrop_export_factor_cache(
++    const PdSolverOrig<OcpType> *solver, const ProblemInfo<OcpType> &info,
++    Scalar *forward_hessians, Scalar *terminal_hessian, Scalar *dynamics,
++    Scalar *value_hessians, Scalar *control_cholesky, Scalar *cross_factors)
++{
++    return solver != nullptr && solver->export_factor_cache(
++                                    info, forward_hessians, terminal_hessian,
++                                    dynamics, value_hessians, control_cholesky,
++                                    cross_factors);
++}
++
++// Stable zero-copy entry point used by integrated differentiable solvers. It
++// consumes the numerical factorization that already lives in solver.
++#if defined(_WIN32)
++extern "C" __declspec(dllexport)
++#else
++extern "C" __attribute__((visibility("default")))
++#endif
++bool fatrop_solve_cached_reduced_rhs(
++    PdSolverOrig<OcpType> *solver, const Scalar *rhs_f,
++    const Scalar *rhs_g, Scalar *x, Scalar *mult)
++{
++    return solver != nullptr &&
++           solver->solve_cached_reduced_rhs(rhs_f, rhs_g, x, mult);
++}
++
++#if defined(_WIN32)
++extern "C" __declspec(dllexport)
++#else
++extern "C" __attribute__((visibility("default")))
++#endif
++bool fatrop_solve_cached_reduced_rhs_batch(
++    PdSolverOrig<OcpType> *solver, const Scalar *rhs_f,
++    const Scalar *rhs_g, int nrhs, Scalar *x, Scalar *mult)
++{
++    return solver != nullptr && solver->solve_cached_reduced_rhs_batch(
++        rhs_f, rhs_g, nrhs, x, mult);
++}

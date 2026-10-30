@@ -1,0 +1,31 @@
+{
+  "selection_rule": "complete run with RMSE closest to the stage median",
+  "before_complete_runs": [
+    {
+      "name": "car_ours_before_20260912_163330_20175",
+      "rmse_cm": 22.747933338027757
+    },
+    {
+      "name": "car_ours_before_20260912_164047_20271",
+      "rmse_cm": 22.886494441453383
+    },
+    {
+      "name": "car_ours_before_20260912_164931_20584",
+      "rmse_cm": 21.885030135282214
+    }
+  ],
+  "after_complete_runs": [
+    {
+      "name": "car_ours_after_20260912_164515_20425",
+      "rmse_cm": 6.122930504394349
+    },
+    {
+      "name": "car_ours_after_20260912_164804_20506",
+      "rmse_cm": 6.064316975025607
+    }
+  ],
+  "selected_before": "car_ours_before_20260912_163330_20175",
+  "selected_after": "car_ours_after_20260912_164804_20506",
+  "learning_csv": "data/training/ours/learning.csv",
+  "learning_acados_csv": "data/training/acados/learning.csv"
+}

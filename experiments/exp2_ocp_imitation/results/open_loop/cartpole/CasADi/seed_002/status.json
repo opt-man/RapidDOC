@@ -1,0 +1,8 @@
+{
+  "problem": "cartpole",
+  "method": "CasADi",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 800,
+  "train_seconds": 269.7152618991677
+}

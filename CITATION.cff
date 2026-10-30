@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use RapidDOC, please cite the accompanying manuscript."
+title: "RapidDOC: Riccati-Preconditioned Implicit Differentiation for Differentiable Optimal Control under Operator Mismatch"
+type: software
+version: 0.1.0
+authors:
+  - family-names: Zhu
+    given-names: Xiangda
+  - family-names: Chen
+    given-names: Yuankun
+  - family-names: Nie
+    given-names: Zifei
+  - family-names: Chang
+    given-names: Yi
+contact:
+  - family-names: Nie
+    given-names: Zifei
+    email: zifei_nie@jlu.edu.cn

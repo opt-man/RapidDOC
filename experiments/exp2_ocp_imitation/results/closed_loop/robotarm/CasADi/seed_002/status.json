@@ -1,0 +1,9 @@
+{
+  "problem": "robotarm",
+  "method": "CasADi",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 500,
+  "train_seconds": 268.95292040123604,
+  "skipped_completed": true
+}

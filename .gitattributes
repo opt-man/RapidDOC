@@ -1,0 +1,8 @@
+# Preserve byte-identical frozen artifacts and source hashes on every platform.
+* -text
+*.py text eol=lf
+*.md text eol=lf
+*.npz binary
+*.pdf binary
+*.mp4 binary
+*.png binary

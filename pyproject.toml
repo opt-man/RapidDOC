@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rapiddoc"
+version = "0.1.0"
+description = "Riccati-preconditioned implicit differentiation for optimal control"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy"]
+authors = [{name = "Xiangda Zhu"}, {name = "Yuankun Chen"}, {name = "Zifei Nie"}, {name = "Yi Chang"}]
+
+[project.optional-dependencies]
+experiments = ["casadi==3.8.0", "matplotlib", "threadpoolctl"]
+video = ["Pillow", "opencv-python", "reportlab"]
+
+[tool.setuptools]
+packages = ["rapidoc"]
+
+[tool.setuptools.package-data]
+rapidoc = ["*.h", "*.cpp", "CMakeLists.txt", "patches/*.patch"]

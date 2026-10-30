@@ -1,0 +1,9 @@
+{
+  "problem": "robotarm",
+  "method": "SafePDP",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 500,
+  "train_seconds": 807.7501436001621,
+  "skipped_completed": true
+}

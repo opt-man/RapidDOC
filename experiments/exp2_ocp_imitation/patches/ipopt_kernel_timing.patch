@@ -1,0 +1,555 @@
+diff --git a/src/Algorithm/IpPDFullSpaceSolver.cpp b/src/Algorithm/IpPDFullSpaceSolver.cpp
+index 195ab4d..6d350f8 100644
+--- a/src/Algorithm/IpPDFullSpaceSolver.cpp
++++ b/src/Algorithm/IpPDFullSpaceSolver.cpp
+@@ -5,6 +5,7 @@
+ // Authors:  Carl Laird, Andreas Waechter     IBM    2004-08-13
+ 
+ #include "IpPDFullSpaceSolver.hpp"
++#include "IpSolveKernelTimer.hpp"
+ #include "IpDebug.hpp"
+ 
+ #include <cmath>
+@@ -352,12 +353,12 @@ bool PDFullSpaceSolver::Solve(
+    // Finally let's assemble the res result vectors
+    if( alpha != 0. )
+    {
+-      res.Scal(alpha);
++      FRS_IPOPT_CONTEXT(FrsReduction, res.Scal(alpha));
+    }
+ 
+    if( beta != 0. )
+    {
+-      res.Axpy(beta, *copy_res);
++      FRS_IPOPT_KERNEL(FrsReduction, res.Axpy(beta, *copy_res));
+    }
+ 
+    DBG_PRINT_VECTOR(2, "res_x", *res.x());
+@@ -416,12 +417,12 @@ bool PDFullSpaceSolver::SolveOnce(
+ 
+    // Compute the right hand side for the augmented system formulation
+    SmartPtr<Vector> augRhs_x = rhs.x()->MakeNewCopy();
+-   Px_L.AddMSinvZ(1.0, slack_x_L, *rhs.z_L(), *augRhs_x);
+-   Px_U.AddMSinvZ(-1.0, slack_x_U, *rhs.z_U(), *augRhs_x);
++   FRS_IPOPT_CONTEXT(FrsReduction, Px_L.AddMSinvZ(1.0, slack_x_L, *rhs.z_L(), *augRhs_x));
++   FRS_IPOPT_CONTEXT(FrsReduction, Px_U.AddMSinvZ(-1.0, slack_x_U, *rhs.z_U(), *augRhs_x));
+ 
+    SmartPtr<Vector> augRhs_s = rhs.s()->MakeNewCopy();
+-   Pd_L.AddMSinvZ(1.0, slack_s_L, *rhs.v_L(), *augRhs_s);
+-   Pd_U.AddMSinvZ(-1.0, slack_s_U, *rhs.v_U(), *augRhs_s);
++   FRS_IPOPT_CONTEXT(FrsReduction, Pd_L.AddMSinvZ(1.0, slack_s_L, *rhs.v_L(), *augRhs_s));
++   FRS_IPOPT_CONTEXT(FrsReduction, Pd_U.AddMSinvZ(-1.0, slack_s_U, *rhs.v_U(), *augRhs_s));
+ 
+    // Get space into which we can put the solution of the augmented system
+    SmartPtr<IteratesVector> sol = res.MakeNewIteratesVector(true);
+@@ -598,25 +599,25 @@ bool PDFullSpaceSolver::SolveOnce(
+             {
+                // check if we have a direction of sufficient positive curvature
+                SmartPtr<Vector> x_tmp = sol->x()->MakeNew();
+-               W.MultVector(1., *sol->x(), 0., *x_tmp);
+-               Number xWx = x_tmp->Dot(*sol->x());
++               FRS_IPOPT_KERNEL(FrsReduction, W.MultVector(1., *sol->x(), 0., *x_tmp));
++               Number xWx = FRS_IPOPT_CONTEXT(FrsReduction, x_tmp->Dot(*sol->x()));
+                x_tmp->Copy(*sol->x());
+-               x_tmp->ElementWiseMultiply(sigma_x);
+-               xWx += x_tmp->Dot(*sol->x());
++               FRS_IPOPT_KERNEL(FrsReduction, x_tmp->ElementWiseMultiply(sigma_x));
++               FRS_IPOPT_CONTEXT(FrsReduction, xWx += x_tmp->Dot(*sol->x()));
+                SmartPtr<Vector> s_tmp = sol->s()->MakeNewCopy();
+-               s_tmp->ElementWiseMultiply(sigma_s);
+-               xWx += s_tmp->Dot(*sol->s());
++               FRS_IPOPT_KERNEL(FrsReduction, s_tmp->ElementWiseMultiply(sigma_s));
++               FRS_IPOPT_CONTEXT(FrsReduction, xWx += s_tmp->Dot(*sol->s()));
+                if (neg_curv_test_reg_)
+                {
+                   x_tmp->Copy(*sol->x());
+-                  x_tmp->Scal(delta_x);
+-                  xWx += x_tmp->Dot(*sol->x());
++                  FRS_IPOPT_CONTEXT(FrsReduction, x_tmp->Scal(delta_x));
++                  FRS_IPOPT_CONTEXT(FrsReduction, xWx += x_tmp->Dot(*sol->x()));
+ 
+                   s_tmp->Copy(*sol->s());
+-                  s_tmp->Scal(delta_s);
+-                  xWx += s_tmp->Dot(*sol->s());
++                  FRS_IPOPT_CONTEXT(FrsReduction, s_tmp->Scal(delta_s));
++                  FRS_IPOPT_CONTEXT(FrsReduction, xWx += s_tmp->Dot(*sol->s()));
+                }
+-               Number xs_nrmsq = std::pow(sol->x()->Nrm2(), 2) + std::pow(sol->s()->Nrm2(), 2);
++               Number xs_nrmsq = FRS_IPOPT_CONTEXT(FrsReduction, std::pow(sol->x()->Nrm2(), 2) + std::pow(sol->s()->Nrm2(), 2));
+                Jnlst().Printf(J_DETAILED, J_LINEAR_ALGEBRA,
+                               "In inertia heuristic: xWx = %e xx = %e\n",
+                               xWx, xs_nrmsq);
+@@ -650,13 +651,13 @@ bool PDFullSpaceSolver::SolveOnce(
+    }
+ 
+    // Compute the remaining sol Vectors
+-   Px_L.SinvBlrmZMTdBr(-1., slack_x_L, *rhs.z_L(), z_L, *sol->x(), *sol->z_L_NonConst());
+-   Px_U.SinvBlrmZMTdBr(1., slack_x_U, *rhs.z_U(), z_U, *sol->x(), *sol->z_U_NonConst());
+-   Pd_L.SinvBlrmZMTdBr(-1., slack_s_L, *rhs.v_L(), v_L, *sol->s(), *sol->v_L_NonConst());
+-   Pd_U.SinvBlrmZMTdBr(1., slack_s_U, *rhs.v_U(), v_U, *sol->s(), *sol->v_U_NonConst());
++   FRS_IPOPT_KERNEL(FrsReduction, Px_L.SinvBlrmZMTdBr(-1., slack_x_L, *rhs.z_L(), z_L, *sol->x(), *sol->z_L_NonConst()));
++   FRS_IPOPT_KERNEL(FrsReduction, Px_U.SinvBlrmZMTdBr(1., slack_x_U, *rhs.z_U(), z_U, *sol->x(), *sol->z_U_NonConst()));
++   FRS_IPOPT_KERNEL(FrsReduction, Pd_L.SinvBlrmZMTdBr(-1., slack_s_L, *rhs.v_L(), v_L, *sol->s(), *sol->v_L_NonConst()));
++   FRS_IPOPT_KERNEL(FrsReduction, Pd_U.SinvBlrmZMTdBr(1., slack_s_U, *rhs.v_U(), v_U, *sol->s(), *sol->v_U_NonConst()));
+ 
+    // Finally let's assemble the res result vectors
+-   res.AddOneVector(alpha, *sol, beta);
++   FRS_IPOPT_KERNEL(FrsReduction, res.AddOneVector(alpha, *sol, beta));
+ 
+    IpData().TimingStats().PDSystemSolverSolveOnce().End();
+ 
+@@ -703,65 +704,65 @@ void PDFullSpaceSolver::ComputeResiduals(
+    SmartPtr<Vector> tmp;
+ 
+    // x
+-   W.MultVector(1., *res.x(), 0., *resid.x_NonConst());
+-   J_c.TransMultVector(1., *res.y_c(), 1., *resid.x_NonConst());
+-   J_d.TransMultVector(1., *res.y_d(), 1., *resid.x_NonConst());
+-   Px_L.MultVector(-1., *res.z_L(), 1., *resid.x_NonConst());
+-   Px_U.MultVector(1., *res.z_U(), 1., *resid.x_NonConst());
+-   resid.x_NonConst()->AddTwoVectors(delta_x, *res.x(), -1., *rhs.x(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, W.MultVector(1., *res.x(), 0., *resid.x_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, J_c.TransMultVector(1., *res.y_c(), 1., *resid.x_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, J_d.TransMultVector(1., *res.y_d(), 1., *resid.x_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, Px_L.MultVector(-1., *res.z_L(), 1., *resid.x_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, Px_U.MultVector(1., *res.z_U(), 1., *resid.x_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.x_NonConst()->AddTwoVectors(delta_x, *res.x(), -1., *rhs.x(), 1.));
+ 
+    // s
+-   Pd_U.MultVector(1., *res.v_U(), 0., *resid.s_NonConst());
+-   Pd_L.MultVector(-1., *res.v_L(), 1., *resid.s_NonConst());
+-   resid.s_NonConst()->AddTwoVectors(-1., *res.y_d(), -1., *rhs.s(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, Pd_U.MultVector(1., *res.v_U(), 0., *resid.s_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, Pd_L.MultVector(-1., *res.v_L(), 1., *resid.s_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.s_NonConst()->AddTwoVectors(-1., *res.y_d(), -1., *rhs.s(), 1.));
+    if( delta_s != 0. )
+    {
+-      resid.s_NonConst()->Axpy(delta_s, *res.s());
++      FRS_IPOPT_KERNEL(FrsResidual, resid.s_NonConst()->Axpy(delta_s, *res.s()));
+    }
+ 
+    // c
+-   J_c.MultVector(1., *res.x(), 0., *resid.y_c_NonConst());
+-   resid.y_c_NonConst()->AddTwoVectors(-delta_c, *res.y_c(), -1., *rhs.y_c(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, J_c.MultVector(1., *res.x(), 0., *resid.y_c_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.y_c_NonConst()->AddTwoVectors(-delta_c, *res.y_c(), -1., *rhs.y_c(), 1.));
+ 
+    // d
+-   J_d.MultVector(1., *res.x(), 0., *resid.y_d_NonConst());
+-   resid.y_d_NonConst()->AddTwoVectors(-1., *res.s(), -1., *rhs.y_d(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, J_d.MultVector(1., *res.x(), 0., *resid.y_d_NonConst()));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.y_d_NonConst()->AddTwoVectors(-1., *res.s(), -1., *rhs.y_d(), 1.));
+    if( delta_d != 0. )
+    {
+-      resid.y_d_NonConst()->Axpy(-delta_d, *res.y_d());
++      FRS_IPOPT_KERNEL(FrsResidual, resid.y_d_NonConst()->Axpy(-delta_d, *res.y_d()));
+    }
+ 
+    // zL
+    resid.z_L_NonConst()->Copy(*res.z_L());
+-   resid.z_L_NonConst()->ElementWiseMultiply(slack_x_L);
++   FRS_IPOPT_KERNEL(FrsResidual, resid.z_L_NonConst()->ElementWiseMultiply(slack_x_L));
+    tmp = z_L.MakeNew();
+-   Px_L.TransMultVector(1., *res.x(), 0., *tmp);
+-   tmp->ElementWiseMultiply(z_L);
+-   resid.z_L_NonConst()->AddTwoVectors(1., *tmp, -1., *rhs.z_L(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, Px_L.TransMultVector(1., *res.x(), 0., *tmp));
++   FRS_IPOPT_KERNEL(FrsResidual, tmp->ElementWiseMultiply(z_L));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.z_L_NonConst()->AddTwoVectors(1., *tmp, -1., *rhs.z_L(), 1.));
+ 
+    // zU
+    resid.z_U_NonConst()->Copy(*res.z_U());
+-   resid.z_U_NonConst()->ElementWiseMultiply(slack_x_U);
++   FRS_IPOPT_KERNEL(FrsResidual, resid.z_U_NonConst()->ElementWiseMultiply(slack_x_U));
+    tmp = z_U.MakeNew();
+-   Px_U.TransMultVector(1., *res.x(), 0., *tmp);
+-   tmp->ElementWiseMultiply(z_U);
+-   resid.z_U_NonConst()->AddTwoVectors(-1., *tmp, -1., *rhs.z_U(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, Px_U.TransMultVector(1., *res.x(), 0., *tmp));
++   FRS_IPOPT_KERNEL(FrsResidual, tmp->ElementWiseMultiply(z_U));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.z_U_NonConst()->AddTwoVectors(-1., *tmp, -1., *rhs.z_U(), 1.));
+ 
+    // vL
+    resid.v_L_NonConst()->Copy(*res.v_L());
+-   resid.v_L_NonConst()->ElementWiseMultiply(slack_s_L);
++   FRS_IPOPT_KERNEL(FrsResidual, resid.v_L_NonConst()->ElementWiseMultiply(slack_s_L));
+    tmp = v_L.MakeNew();
+-   Pd_L.TransMultVector(1., *res.s(), 0., *tmp);
+-   tmp->ElementWiseMultiply(v_L);
+-   resid.v_L_NonConst()->AddTwoVectors(1., *tmp, -1., *rhs.v_L(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, Pd_L.TransMultVector(1., *res.s(), 0., *tmp));
++   FRS_IPOPT_KERNEL(FrsResidual, tmp->ElementWiseMultiply(v_L));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.v_L_NonConst()->AddTwoVectors(1., *tmp, -1., *rhs.v_L(), 1.));
+ 
+    // vU
+    resid.v_U_NonConst()->Copy(*res.v_U());
+-   resid.v_U_NonConst()->ElementWiseMultiply(slack_s_U);
++   FRS_IPOPT_KERNEL(FrsResidual, resid.v_U_NonConst()->ElementWiseMultiply(slack_s_U));
+    tmp = v_U.MakeNew();
+-   Pd_U.TransMultVector(1., *res.s(), 0., *tmp);
+-   tmp->ElementWiseMultiply(v_U);
+-   resid.v_U_NonConst()->AddTwoVectors(-1., *tmp, -1., *rhs.v_U(), 1.);
++   FRS_IPOPT_KERNEL(FrsResidual, Pd_U.TransMultVector(1., *res.s(), 0., *tmp));
++   FRS_IPOPT_KERNEL(FrsResidual, tmp->ElementWiseMultiply(v_U));
++   FRS_IPOPT_KERNEL(FrsResidual, resid.v_U_NonConst()->AddTwoVectors(-1., *tmp, -1., *rhs.v_U(), 1.));
+ 
+    DBG_PRINT_VECTOR(2, "resid", resid);
+ 
+@@ -800,9 +801,9 @@ Number PDFullSpaceSolver::ComputeResidualRatio(
+ {
+    DBG_START_METH("PDFullSpaceSolver::ComputeResidualRatio", dbg_verbosity);
+ 
+-   Number nrm_rhs = rhs.Amax();
+-   Number nrm_res = res.Amax();
+-   Number nrm_resid = resid.Amax();
++   Number nrm_rhs = FRS_IPOPT_CONTEXT(FrsResidual, rhs.Amax());
++   Number nrm_res = FRS_IPOPT_CONTEXT(FrsResidual, res.Amax());
++   Number nrm_resid = FRS_IPOPT_CONTEXT(FrsResidual, resid.Amax());
+    Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
+                   "nrm_rhs = %8.2e nrm_sol = %8.2e nrm_resid = %8.2e\n", nrm_rhs, nrm_res, nrm_resid);
+ 
+diff --git a/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp b/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp
+index 14c475d..e0dc30c 100644
+--- a/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp
++++ b/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp
+@@ -29,6 +29,7 @@
+ #endif
+ 
+ #include "IpMumpsSolverInterface.hpp"
++#include "IpSolveKernelTimer.hpp"
+ 
+ #if IPOPT_SINGLE
+ #include "smumps_c.h"
+@@ -487,7 +488,7 @@ ESymSolverStatus MumpsSolverInterface::Factorization(
+    dump_matrix(mumps_data);
+    Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
+                   "Calling MUMPS-2 for numerical factorization.\n");
+-   mumps_c(mumps_data);
++   FRS_IPOPT_KERNEL(FrsFactor, mumps_c(mumps_data));
+    Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
+                   "Done with MUMPS-2 for numerical factorization.\n");
+    Index error = mumps_data->info[0];
+@@ -508,7 +509,7 @@ ESymSolverStatus MumpsSolverInterface::Factorization(
+          dump_matrix(mumps_data);
+          Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
+                         "Calling MUMPS-2 (repeated) for numerical factorization.\n");
+-         mumps_c(mumps_data);
++         FRS_IPOPT_KERNEL(FrsFactor, mumps_c(mumps_data));
+          Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
+                         "Done with MUMPS-2 (repeated) for numerical factorization.\n");
+          error = mumps_data->info[0];
+@@ -589,7 +590,7 @@ ESymSolverStatus MumpsSolverInterface::Solve(
+       mumps_data->job = 3;  //solve
+       Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
+                      "Calling MUMPS-3 for solve.\n");
+-      mumps_c(mumps_data);
++      FRS_IPOPT_KERNEL(FrsBacksolve, mumps_c(mumps_data));
+       Jnlst().Printf(J_MOREDETAILED, J_LINEAR_ALGEBRA,
+                      "Done with MUMPS-3 for solve.\n");
+       Index error = mumps_data->info[0];
+@@ -680,7 +681,7 @@ ESymSolverStatus MumpsSolverInterface::DetermineDependentRows(
+    mumps_data->job = 2;   //numerical factorization
+ 
+    dump_matrix(mumps_data);
+-   mumps_c(mumps_data);
++   FRS_IPOPT_KERNEL(FrsFactor, mumps_c(mumps_data));
+    Index error = mumps_data->info[0];
+ 
+    //Check for errors
+@@ -697,7 +698,7 @@ ESymSolverStatus MumpsSolverInterface::DetermineDependentRows(
+                         "  Increasing icntl[13] from %" IPOPT_INDEX_FORMAT " to %" IPOPT_INDEX_FORMAT ".\n", old_mem_percent, mumps_data->icntl[13]);
+ 
+          dump_matrix(mumps_data);
+-         mumps_c(mumps_data);
++         FRS_IPOPT_KERNEL(FrsFactor, mumps_c(mumps_data));
+          error = mumps_data->info[0];
+          if( error != -8 && error != -9 )
+          {
+diff --git a/src/Common/IpSolveKernelTimer.hpp b/src/Common/IpSolveKernelTimer.hpp
+new file mode 100644
+index 0000000..0db1e5c
+--- /dev/null
++++ b/src/Common/IpSolveKernelTimer.hpp
+@@ -0,0 +1,57 @@
++// Private instrumentation; it does not change Ipopt's numerical algorithm.
++#ifndef FRS_IPOPT_SOLVE_KERNEL_TIMER_HPP
++#define FRS_IPOPT_SOLVE_KERNEL_TIMER_HPP
++#include "IpoptConfig.h"
++#include <chrono>
++
++extern "C" {
++IPOPTLIB_EXPORT const char* frs_ipopt_solve_timer_protocol_v4();
++IPOPTLIB_EXPORT void frs_ipopt_solve_timer_reset_v4();
++IPOPTLIB_EXPORT double frs_ipopt_solve_timer_read_v4();
++IPOPTLIB_EXPORT double frs_ipopt_solve_timer_seconds_v4(int kind);
++IPOPTLIB_EXPORT unsigned long long frs_ipopt_solve_timer_count_v4(int kind);
++IPOPTLIB_EXPORT void frs_ipopt_solve_timer_add_v4(int kind, double seconds);
++IPOPTLIB_EXPORT int frs_ipopt_solve_timer_context_v4();
++IPOPTLIB_EXPORT int frs_ipopt_solve_timer_exchange_context_v4(int kind);
++IPOPTLIB_EXPORT bool frs_ipopt_solve_timer_enter_v4();
++IPOPTLIB_EXPORT void frs_ipopt_solve_timer_leave_v4();
++}
++
++namespace Ipopt {
++enum FrsKernelKind { FrsFactor = 0, FrsBacksolve = 1, FrsResidual = 2, FrsReduction = 3 };
++class FrsKernelScope {
++    int kind_;
++    bool outermost_;
++    std::chrono::steady_clock::time_point start_;
++public:
++    explicit FrsKernelScope(int kind) : kind_(kind),
++        outermost_(kind >= 0 && frs_ipopt_solve_timer_enter_v4()) {
++        if (outermost_) start_ = std::chrono::steady_clock::now();
++    }
++    ~FrsKernelScope() {
++        if (outermost_) {
++            const auto end = std::chrono::steady_clock::now();
++            frs_ipopt_solve_timer_add_v4(kind_, std::chrono::duration<double>(end-start_).count());
++        }
++        if (kind_ >= 0) frs_ipopt_solve_timer_leave_v4();
++    }
++};
++// A context is not timed. Only explicitly marked arithmetic inside it is.
++// This keeps cache lookup/update and temporary-vector allocation excluded.
++class FrsKernelContext {
++    int previous_;
++public:
++    explicit FrsKernelContext(int kind)
++        : previous_(frs_ipopt_solve_timer_exchange_context_v4(kind)) {}
++    ~FrsKernelContext() { frs_ipopt_solve_timer_exchange_context_v4(previous_); }
++};
++}
++
++// Wrap only numerical calls, never workspace creation, copies or assembly.
++#define FRS_IPOPT_KERNEL(kind, expr) \
++    ([&]() { Ipopt::FrsKernelScope frs_scope(kind); return (expr); }())
++#define FRS_IPOPT_CONTEXT(kind, expr) \
++    ([&]() { Ipopt::FrsKernelContext frs_context(kind); return (expr); }())
++#define FRS_IPOPT_CONTEXT_KERNEL(expr) \
++    FRS_IPOPT_KERNEL(frs_ipopt_solve_timer_context_v4(), expr)
++#endif
+diff --git a/src/Common/IpUtils.cpp b/src/Common/IpUtils.cpp
+index 65f49b7..3918af8 100644
+--- a/src/Common/IpUtils.cpp
++++ b/src/Common/IpUtils.cpp
+@@ -18,6 +18,7 @@
+ #include <cstdarg>
+ #include <csignal>
+ #include <limits>
++#include <chrono>
+ 
+ #if defined(_MSC_VER) && _MSC_VER < 1900
+ #define vsnprintf _vsnprintf
+@@ -142,8 +143,6 @@ void IpResetRandom01()
+ #endif
+ }
+ 
+-static double Wallclock_firstCall_ = -1.;
+-
+ // The following function were taken from CoinTime.hpp in COIN/Coin
+ Number CpuTime()
+ {
+@@ -184,12 +183,11 @@ Number SysTime()
+ 
+ Number WallclockTime()
+ {
+-   double callTime = IpCoinGetTimeOfDay();
+-   if( Wallclock_firstCall_ == -1. )
+-   {
+-      Wallclock_firstCall_ = callTime;
+-   }
+-   return callTime - Wallclock_firstCall_;
++   // Retain Ipopt's native timing scopes, but avoid the millisecond _ftime
++   // clock on Windows. A monotonic shared origin also avoids civil-time jumps.
++   using Clock = std::chrono::steady_clock;
++   static const auto origin = Clock::now();
++   return std::chrono::duration<double>(Clock::now() - origin).count();
+ }
+ 
+ static bool registered_handler = false;
+diff --git a/src/Common/config_default.h b/src/Common/config_default.h
+index d4dfce8..c54ed2a 100644
+--- a/src/Common/config_default.h
++++ b/src/Common/config_default.h
+@@ -62,8 +62,8 @@
+ #define IPOPT_HAS_VA_COPY 1
+ #endif
+ 
+-#define IPOPT_BLAS_FUNC(name,NAME)    F77_FUNC(name,NAME)
+-#define IPOPT_LAPACK_FUNC(name,NAME)  F77_FUNC(name,NAME)
++/* Generated from the existing conda runtime's exported BLAS/LAPACK names. */
++#include "frs_blas_symbols.h"
+ #define IPOPT_PARDISO_FUNC(name,NAME) F77_FUNC(name,NAME)
+ #define IPOPT_WSMP_FUNC(name,NAME)    F77_FUNC(name,NAME)
+ #define IPOPT_WSMP_FUNC_(name,NAME)   F77_FUNC_(name,NAME)
+diff --git a/src/Common/config_ipopt_default.h b/src/Common/config_ipopt_default.h
+index 2362e36..651edff 100644
+--- a/src/Common/config_ipopt_default.h
++++ b/src/Common/config_ipopt_default.h
+@@ -33,8 +33,8 @@
+ 
+ #ifndef SIPOPTLIB_EXPORT
+ #if defined(_WIN32) && defined(DLL_EXPORT)
+-#define DIPOPTLIB_EXPORT __declspec(dllimport)
++#define SIPOPTLIB_EXPORT __declspec(dllimport)
+ #else
+-#define DIPOPTLIB_EXPORT
++#define SIPOPTLIB_EXPORT
+ #endif
+ #endif
+diff --git a/src/LinAlg/IpCompoundVector.cpp b/src/LinAlg/IpCompoundVector.cpp
+index ed73645..b14125e 100644
+--- a/src/LinAlg/IpCompoundVector.cpp
++++ b/src/LinAlg/IpCompoundVector.cpp
+@@ -137,7 +137,8 @@ Number CompoundVector::DotImpl(
+    for( Index i = 0; i < NComps(); i++ )
+    {
+       DBG_ASSERT(ConstComp(i));
+-      dot += ConstComp(i)->Dot(*comp_x->GetComp(i));
++      const Number component_dot = ConstComp(i)->Dot(*comp_x->GetComp(i));
++      FRS_IPOPT_CONTEXT_KERNEL(dot += component_dot);
+    }
+    return dot;
+ }
+@@ -150,9 +151,9 @@ Number CompoundVector::Nrm2Impl() const
+    for( Index i = 0; i < NComps(); i++ )
+    {
+       Number nrm2 = ConstComp(i)->Nrm2();
+-      sum += nrm2 * nrm2;
++      FRS_IPOPT_CONTEXT_KERNEL(sum += nrm2 * nrm2);
+    }
+-   return std::sqrt(sum);
++   return FRS_IPOPT_CONTEXT_KERNEL(std::sqrt(sum));
+ }
+ 
+ Number CompoundVector::AsumImpl() const
+@@ -174,7 +175,8 @@ Number CompoundVector::AmaxImpl() const
+    Number max = 0.;
+    for( Index i = 0; i < NComps(); i++ )
+    {
+-      max = Ipopt::Max(max, ConstComp(i)->Amax());
++      const Number component_max = ConstComp(i)->Amax();
++      FRS_IPOPT_CONTEXT_KERNEL(max = Ipopt::Max(max, component_max));
+    }
+    return max;
+ }
+diff --git a/src/LinAlg/IpDenseVector.cpp b/src/LinAlg/IpDenseVector.cpp
+index 5b90313..e7b2438 100644
+--- a/src/LinAlg/IpDenseVector.cpp
++++ b/src/LinAlg/IpDenseVector.cpp
+@@ -117,6 +117,7 @@ void DenseVector::ScalImpl(
+ )
+ {
+    DBG_ASSERT(initialized_);
++   FrsKernelScope arithmetic(Dim() > 0 ? frs_ipopt_solve_timer_context_v4() : -1);
+    if( homogeneous_ )
+    {
+       scalar_ *= alpha;
+@@ -193,6 +194,7 @@ Number DenseVector::DotImpl(
+       return 0.0;
+    }
+ 
++   FrsKernelScope arithmetic(frs_ipopt_solve_timer_context_v4());
+    if( homogeneous_ )
+    {
+       if( dense_x->homogeneous_ )
+@@ -221,6 +223,7 @@ Number DenseVector::DotImpl(
+ Number DenseVector::Nrm2Impl() const
+ {
+    DBG_ASSERT(initialized_);
++   FrsKernelScope arithmetic(Dim() > 0 ? frs_ipopt_solve_timer_context_v4() : -1);
+    if( homogeneous_ )
+    {
+       return std::sqrt((Number) Dim()) * std::abs(scalar_);
+@@ -252,6 +255,7 @@ Number DenseVector::AmaxImpl() const
+       return 0.;
+    }
+ 
++   FrsKernelScope arithmetic(frs_ipopt_solve_timer_context_v4());
+    if( homogeneous_ )
+    {
+       return std::abs(scalar_);
+diff --git a/src/LinAlg/IpExpansionMatrix.cpp b/src/LinAlg/IpExpansionMatrix.cpp
+index 47edcb4..de7a679 100644
+--- a/src/LinAlg/IpExpansionMatrix.cpp
++++ b/src/LinAlg/IpExpansionMatrix.cpp
+@@ -205,6 +205,7 @@ void ExpansionMatrix::AddMSinvZImpl(
+       Number val = alpha * dense_Z->Scalar();
+       if( val != 0. )
+       {
++         FrsKernelScope arithmetic(NCols() > 0 ? frs_ipopt_solve_timer_context_v4() : -1);
+          for( Index i = 0; i < NCols(); i++ )
+          {
+             vals_X[exp_pos[i]] += val / vals_S[i];
+@@ -214,6 +215,7 @@ void ExpansionMatrix::AddMSinvZImpl(
+    else
+    {
+       const Number* vals_Z = dense_Z->Values();
++      FrsKernelScope arithmetic(NCols() > 0 ? frs_ipopt_solve_timer_context_v4() : -1);
+       if( alpha == 1. )
+       {
+          for( Index i = 0; i < NCols(); i++ )
+diff --git a/src/LinAlg/IpIdentityMatrix.cpp b/src/LinAlg/IpIdentityMatrix.cpp
+index 10ff48e..3cc417b 100644
+--- a/src/LinAlg/IpIdentityMatrix.cpp
++++ b/src/LinAlg/IpIdentityMatrix.cpp
+@@ -91,7 +91,7 @@ void IdentityMatrix::AddMSinvZImpl(
+    DBG_ASSERT(NCols() == Z.Dim());
+    DBG_ASSERT(NCols() == X.Dim());
+ 
+-   X.AddVectorQuotient(alpha, Z, S, 1.);
++   FRS_IPOPT_CONTEXT_KERNEL(X.AddVectorQuotient(alpha, Z, S, 1.));
+ }
+ 
+ } // namespace Ipopt
+diff --git a/src/LinAlg/IpMatrix.cpp b/src/LinAlg/IpMatrix.cpp
+index b252496..704a490 100644
+--- a/src/LinAlg/IpMatrix.cpp
++++ b/src/LinAlg/IpMatrix.cpp
+@@ -39,8 +39,8 @@ void Matrix::AddMSinvZImpl(
+ ) const
+ {
+    SmartPtr<Vector> tmp = S.MakeNew();
+-   tmp->AddVectorQuotient(1., Z, S, 0.);
+-   MultVector(alpha, *tmp, 1., X);
++   FRS_IPOPT_CONTEXT_KERNEL(tmp->AddVectorQuotient(1., Z, S, 0.));
++   FRS_IPOPT_CONTEXT_KERNEL(MultVector(alpha, *tmp, 1., X));
+ }
+ 
+ void Matrix::SinvBlrmZMTdBrImpl(
+diff --git a/src/LinAlg/IpScaledMatrix.cpp b/src/LinAlg/IpScaledMatrix.cpp
+index c753301..e3eb26a 100644
+--- a/src/LinAlg/IpScaledMatrix.cpp
++++ b/src/LinAlg/IpScaledMatrix.cpp
+@@ -169,8 +169,8 @@ void ScaledMatrix::AddMSinvZImpl(
+    DBG_ASSERT(false && "Got the ScaledMatrix::AddMSinvZImpl.  Should implement specialized method!");
+ 
+    SmartPtr<Vector> tmp = S.MakeNew();
+-   tmp->AddVectorQuotient(1., Z, S, 0.);
+-   MultVector(alpha, *tmp, 1., X);
++   FRS_IPOPT_CONTEXT_KERNEL(tmp->AddVectorQuotient(1., Z, S, 0.));
++   FRS_IPOPT_CONTEXT_KERNEL(MultVector(alpha, *tmp, 1., X));
+ }
+ 
+ void ScaledMatrix::SinvBlrmZMTdBrImpl(
+diff --git a/src/LinAlg/IpVector.hpp b/src/LinAlg/IpVector.hpp
+index 67aab42..40d52f5 100644
+--- a/src/LinAlg/IpVector.hpp
++++ b/src/LinAlg/IpVector.hpp
+@@ -13,6 +13,7 @@
+ #include "IpSmartPtr.hpp"
+ #include "IpJournalist.hpp"
+ #include "IpException.hpp"
++#include "IpSolveKernelTimer.hpp"
+ 
+ #include <vector>
+ 
+@@ -626,7 +627,7 @@ inline Number Vector::Dot(
+    if( this == &x )
+    {
+       Number nrm2 = Nrm2();
+-      return nrm2 * nrm2;
++      return FRS_IPOPT_CONTEXT_KERNEL(nrm2 * nrm2);
+    }
+    Number retValue;
+    if( !dot_cache_.GetCachedResult2Dep(retValue, this, &x) )

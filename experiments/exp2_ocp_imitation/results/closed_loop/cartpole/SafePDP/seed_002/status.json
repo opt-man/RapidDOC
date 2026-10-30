@@ -1,0 +1,9 @@
+{
+  "problem": "cartpole",
+  "method": "SafePDP",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 500,
+  "train_seconds": 810.377585401875,
+  "skipped_completed": true
+}

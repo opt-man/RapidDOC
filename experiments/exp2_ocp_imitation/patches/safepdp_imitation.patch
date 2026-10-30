@@ -1,0 +1,364 @@
+diff --git a/SafePDP/SafePDP.py b/SafePDP/SafePDP.py
+index 225165e..c42bacd 100644
+--- a/SafePDP/SafePDP.py
++++ b/SafePDP/SafePDP.py
+@@ -1,4 +1,4 @@
+-import time
++import time as _time
+ 
+ import casadi
+ import numpy as np
+@@ -156,7 +156,8 @@ class COCsys:
+             self.init_condition_fn = casadi.Function('initial_condition', [self.auxvar], [self.init_condition])
+ 
+     # optimal control solver (using direct methods)
+-    def ocSolver(self, horizon, init_state=None, auxvar_value=1, print_level=0):
++    def ocSolver(self, horizon, init_state=None, auxvar_value=1, print_level=0,
++                 initial_guess=None, solver_options=None, solve_timer=None):
+ 
+         if not hasattr(self, 'final_equ_cstr'):
+             self.setFinalEquCstr()
+@@ -174,82 +175,142 @@ class COCsys:
+         else:
+             init_state = casadi.DM(init_state).full().flatten().tolist()
+ 
+-        # Start with an empty NLP
+-        w = []
+-        w0 = []
+-        lbw = []
+-        ubw = []
+-        J = 0
+-        g = []
+-        lbg = []
+-        ubg = []
+-
+-        # "Lift" initial conditions
+-        Xk = MX.sym('X0', self.n_state)
+-        w += [Xk]
+-        lbw += init_state
+-        ubw += init_state
+-        w0 += init_state
+-
+-        # formulate the NLP
+-        for k in range(horizon):
+-            # New NLP variable for the control
+-            Uk = MX.sym('U_' + str(k), self.n_control)
+-            w += [Uk]
+-            lbw += self.control_lb
+-            ubw += self.control_ub
+-            w0 += [0.5 * (x + y) for x, y in zip(self.control_lb, self.control_ub)]
+-
+-            # Add constraint for the path inequality if exist
+-            if self.path_inequ_cstr is not None:
+-                g += [self.path_inequ_cstr_fn(Xk, Uk, auxvar_value)]
+-                lbg += self.n_path_inequ_cstr * [- self.inf]
+-                ubg += self.n_path_inequ_cstr * [0]
+-
+-            # Add constraint for the path equality if exist
+-            if self.path_equ_cstr is not None:
+-                g += [self.path_equ_cstr_fn(Xk, Uk, auxvar_value)]
+-                lbg += self.n_path_equ_cstr * [0]
+-                ubg += self.n_path_equ_cstr * [0]
+-
+-            # Integrate till the end of the interval
+-            Xnext = self.dyn_fn(Xk, Uk, auxvar_value)
+-            Ck = self.path_cost_fn(Xk, Uk, auxvar_value)
+-            J = J + Ck
+-
+-            # New NLP variable for state at end of interval
+-            Xk = MX.sym('X_' + str(k + 1), self.n_state)
++        # Build the parameterized NLP once and reuse it across demonstrations
++        # and epochs.  Only numerical parameters, bounds, and warm starts vary.
++        opts = {'ipopt.print_level': print_level, 'ipopt.sb': 'yes', 'print_time': print_level}
++        if solver_options is not None:
++            opts.update(solver_options)
++        opts['record_time'] = True
++        plugin = 'ipopt' if solve_timer is None else solve_timer.plugin
++        cache_key = (int(horizon), plugin,
++                     tuple(sorted((str(key), repr(value)) for key, value in opts.items())))
++        cache = getattr(self, '_oc_solver_cache', None)
++        if cache is None:
++            cache = {}
++            self._oc_solver_cache = cache
++
++        template = cache.get(cache_key)
++        if template is None:
++            auxvar_parameter = MX.sym('oc_auxvar', self.n_auxvar)
++            w = []
++            w0 = []
++            lbw = []
++            ubw = []
++            J = 0
++            g = []
++            lbg = []
++            ubg = []
++
++            Xk = MX.sym('X0', self.n_state)
+             w += [Xk]
+-            lbw += self.state_lb
+-            ubw += self.state_ub
+-            w0 += [0.5 * (x + y) for x, y in zip(self.state_lb, self.state_ub)]
++            # These entries are replaced by the measured initial state at each
++            # call; placeholders keep the reusable template numeric.
++            lbw += self.n_state * [0.0]
++            ubw += self.n_state * [0.0]
++            w0 += self.n_state * [0.0]
++
++            for k in range(horizon):
++                Uk = MX.sym('U_' + str(k), self.n_control)
++                w += [Uk]
++                lbw += self.control_lb
++                ubw += self.control_ub
++                w0 += [0.5 * (x + y) for x, y in zip(self.control_lb, self.control_ub)]
++
++                if self.path_inequ_cstr is not None:
++                    g += [self.path_inequ_cstr_fn(Xk, Uk, auxvar_parameter)]
++                    lbg += self.n_path_inequ_cstr * [- self.inf]
++                    ubg += self.n_path_inequ_cstr * [0]
++
++                if self.path_equ_cstr is not None:
++                    g += [self.path_equ_cstr_fn(Xk, Uk, auxvar_parameter)]
++                    lbg += self.n_path_equ_cstr * [0]
++                    ubg += self.n_path_equ_cstr * [0]
++
++                Xnext = self.dyn_fn(Xk, Uk, auxvar_parameter)
++                J = J + self.path_cost_fn(Xk, Uk, auxvar_parameter)
++
++                Xk = MX.sym('X_' + str(k + 1), self.n_state)
++                w += [Xk]
++                lbw += self.state_lb
++                ubw += self.state_ub
++                w0 += [0.5 * (x + y) for x, y in zip(self.state_lb, self.state_ub)]
++
++                g += [Xnext - Xk]
++                lbg += self.n_state * [0]
++                ubg += self.n_state * [0]
++
++            if self.final_inequ_cstr is not None:
++                g += [self.final_inequ_cstr_fn(Xk, auxvar_parameter)]
++                lbg += self.n_final_inequ_cstr * [- self.inf]
++                ubg += self.n_final_inequ_cstr * [0]
++
++            if self.final_equ_cstr is not None:
++                g += [self.final_equ_cstr_fn(Xk, auxvar_parameter)]
++                lbg += self.n_final_equ_cstr * [0]
++                ubg += self.n_final_equ_cstr * [0]
++
++            J = J + self.final_cost_fn(Xk, auxvar_parameter)
++            prob = {'f': J, 'x': vertcat(*w), 'g': vertcat(*g),
++                    'p': auxvar_parameter}
++            solver = nlpsol('solver_' + str(len(cache)), plugin, prob, opts)
++            template = {
++                'solver': solver,
++                'w0': numpy.asarray(w0, dtype=float),
++                'lbw': numpy.asarray(lbw, dtype=float),
++                'ubw': numpy.asarray(ubw, dtype=float),
++                'lbg': numpy.asarray(lbg, dtype=float),
++                'ubg': numpy.asarray(ubg, dtype=float),
++            }
++            cache[cache_key] = template
++
++        solver = template['solver']
++        w0 = template['w0'].copy()
++        lbw = template['lbw'].copy()
++        ubw = template['ubw'].copy()
++        lbg = template['lbg']
++        ubg = template['ubg']
++        lbw[:self.n_state] = init_state
++        ubw[:self.n_state] = init_state
++        w0[:self.n_state] = init_state
++
++        # Optional primal trajectory in [x0, u0, ..., xN] order.
++        # Prepare it outside solve timing and keep the measured initial state.
++        if initial_guess is not None:
++            guess_array = numpy.asarray(initial_guess, dtype=float).reshape(-1)
++            if guess_array.size != len(w0):
++                raise ValueError(
++                    "initial_guess has %d entries; expected %d"
++                    % (guess_array.size, len(w0)))
++            if not numpy.all(numpy.isfinite(guess_array)):
++                raise ValueError("initial_guess must contain only finite values")
++            w0 = guess_array.tolist()
++            w0[:self.n_state] = init_state
+ 
+-            # Add constraint for the dynamics
+-            g += [Xnext - Xk]
+-            lbg += self.n_state * [0]
+-            ubg += self.n_state * [0]
+-
+-        # Add final inequality constraint if exist
+-        if self.final_inequ_cstr is not None:
+-            g += [self.final_inequ_cstr_fn(Xk, auxvar_value)]
+-            lbg += self.n_final_inequ_cstr * [- self.inf]
+-            ubg += self.n_final_inequ_cstr * [0]
+-
+-        # Add final equality constraint if exist
+-        if self.final_equ_cstr is not None:
+-            g += [self.final_equ_cstr_fn(Xk, auxvar_value)]
+-            lbg += self.n_final_equ_cstr * [0]
+-            ubg += self.n_final_equ_cstr * [0]
+-
+-        # Add the final cost
+-        J = J + self.final_cost_fn(Xk, auxvar_value)
+-
+-        # Create an NLP solver and solve
+-        opts = {'ipopt.print_level': print_level, 'ipopt.sb': 'yes', 'print_time': print_level}
+-        prob = {'f': J, 'x': vertcat(*w), 'g': vertcat(*g)}
+-        solver = nlpsol('solver', 'ipopt', prob, opts)
+         # Solve the NLP
+-        sol = solver(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg)
++        inputs = {key: DM(value) for key, value in
++                  dict(x0=w0, lbx=lbw, ubx=ubw, lbg=lbg, ubg=ubg,
++                       p=auxvar_value).items()}
++        if solve_timer is not None:
++            solve_timer.reset()
++        try:
++            sol = solver(**inputs)
++        except BaseException:
++            if solve_timer is not None:
++                solve_timer.cancel()
++            raise
++        solve_stats = solver.stats()
++        if not solve_stats.get('success', False):
++            if solve_timer is not None:
++                solve_timer.cancel()
++            raise RuntimeError('SafePDP-IPOPT forward: ' + str(solve_stats.get('return_status')))
++        # The imitation harness supplies a private IPOPT kernel timer and
++        # preflights it in its constructor. Generic upstream callers retain
++        # their original whole-NLP timer, explicitly labeled a different scope.
++        native_solve_seconds = float(solve_stats['t_wall_total'])
++        solve_seconds = native_solve_seconds if solve_timer is None else solve_timer.read()
++        forward_timing_protocol = 'native-nlp-wall-v1' if solve_timer is None else 'solve-kernels-v4'
++        if not numpy.isfinite(solve_seconds) or solve_seconds <= 0:
++            raise RuntimeError('SafePDP forward has no positive native solve timer')
+         w_opt = sol['x'].full().flatten()
+         lam_g = sol['lam_g'].full().flatten()
+         g = sol['g'].full().flatten()
+@@ -290,7 +351,10 @@ class COCsys:
+                    'auxvar_value': auxvar_value,
+                    "time": time,
+                    "horizon": horizon,
+-                   "cost": sol['f'].full()}
++                   "cost": sol['f'].full(),
++                   "solve_seconds": solve_seconds,
++                   "native_solve_seconds": native_solve_seconds,
++                   "timing_protocol": forward_timing_protocol}
+ 
+         return opt_sol
+ 
+@@ -516,8 +580,11 @@ class COCsys:
+         Lxe_T = [self.ddLxe_final_fn(state_traj_opt[-1, :], v_final, w_final, auxvar_value).full()]
+ 
+         if self.final_inequ_cstr is not None:
+-            Gbarx_T = self.dGx_final_fn(state_traj_opt[-1, :], auxvar_value).full()[(v_final > -threshold)]
+-            Gbare_T = self.dGe_final_fn(state_traj_opt[-1, :], auxvar_value).full()[(g_final > -threshold)]
++            active_final = g_final > -threshold
++            Gbarx_T = self.dGx_final_fn(
++                state_traj_opt[-1, :], auxvar_value).full()[active_final]
++            Gbare_T = self.dGe_final_fn(
++                state_traj_opt[-1, :], auxvar_value).full()[active_final]
+         else:
+             Gbarx_T = np.empty((0, self.n_state))
+             Gbare_T = np.empty((0, self.n_auxvar))
+@@ -714,6 +781,7 @@ class EQCLQR:
+ 
+         # backward pass in time to compute the feedback control matrices
+         # pre-set the feedback matrices storage
++        solve_seconds = 0.0
+         Kt = []
+         kt = []
+         # final cost initialization
+@@ -742,19 +810,27 @@ class EQCLQR:
+             curr_Ge = self.Ge_t[t]
+ 
+             # generate the new matrix (Claire Tomlin's paper has some errors, I corrected it here)
++            kernel_start = _time.perf_counter()
+             curr_Mxe = curr_Lxe + curr_Fx.T @ next_v + curr_Fx.T @ next_V @ curr_Fe
+             curr_Mue = curr_Lue + curr_Fu.T @ next_v + curr_Fu.T @ next_V @ curr_Fe
+             curr_Mxx = curr_Lxx + curr_Fx.T @ next_V @ curr_Fx
+             curr_Muu = curr_Luu + curr_Fu.T @ next_V @ curr_Fu
+             curr_Mux = curr_Lux + curr_Fu.T @ next_V @ curr_Fx
+-            curr_Nx = np.vstack((curr_Gx, next_H @ curr_Fx))
+-            curr_Nu = np.vstack((curr_Gu, next_H @ curr_Fu))
+-            curr_Ne = np.vstack((curr_Ge, next_H @ curr_Fe + next_h))
++            propagated_x = next_H @ curr_Fx
++            propagated_u = next_H @ curr_Fu
++            propagated_e = next_H @ curr_Fe + next_h
++            solve_seconds += _time.perf_counter() - kernel_start
++            # Concatenation is data movement, not numerical recursion.
++            curr_Nx = np.vstack((curr_Gx, propagated_x))
++            curr_Nu = np.vstack((curr_Gu, propagated_u))
++            curr_Ne = np.vstack((curr_Ge, propagated_e))
+ 
+             # Generate the matrix Py and Zw in the equality constraint lqr paper
++            kernel_start = _time.perf_counter()
+             U, S, VT = np.linalg.svd(curr_Nu)
+             V = VT.T
+-            rank_S = (S > self.threshold).size
++            rank_S = int(np.count_nonzero(S > self.threshold))
++            solve_seconds += _time.perf_counter() - kernel_start
+             if S.size == 0 or rank_S == 0:  # i.e., if the rank of curr_Nu is zero
+                 Py = np.empty((self.n_control, 0))
+                 Zw = np.eye(self.n_control)
+@@ -766,21 +842,31 @@ class EQCLQR:
+                 Zw = V[:, rank_S:]
+ 
+             # Generate the feedback control policy matrices curr_K, and curr_k
++            kernel_start = _time.perf_counter()
+             pinv_NuPy = np.linalg.pinv(curr_Nu @ Py)
+             inv_ZwTMuuZw = np.linalg.inv(Zw.T @ curr_Muu @ Zw)
+-            curr_K = -(Py @ pinv_NuPy @ curr_Nx + Zw @ inv_ZwTMuuZw @ Zw.T @ curr_Mux)
+-            curr_k = -(Py @ pinv_NuPy @ curr_Ne + Zw @ inv_ZwTMuuZw @ Zw.T @ curr_Mue)
++            particular_K = -Py @ pinv_NuPy @ curr_Nx
++            particular_k = -Py @ pinv_NuPy @ curr_Ne
++            nullspace_solve = Zw @ inv_ZwTMuuZw @ Zw.T
++            curr_K = particular_K - nullspace_solve @ (curr_Mux + curr_Muu @ particular_K)
++            curr_k = particular_k - nullspace_solve @ (curr_Mue + curr_Muu @ particular_k)
++
++            solve_seconds += _time.perf_counter() - kernel_start
+ 
+             # store
+             Kt += [curr_K]
+             kt += [curr_k]
+ 
+             # reiterate the  next_V, next_v, next_H, next_h
++            kernel_start = _time.perf_counter()
+             next_H = curr_Nx - curr_Nu @ Py @ pinv_NuPy @ curr_Nx
+             next_h = curr_Ne - curr_Nu @ Py @ pinv_NuPy @ curr_Ne
+-            next_V = curr_Mxx + 2 * curr_Mux.T @ curr_K + curr_K.T @ curr_Muu @ curr_K
++            next_V = (curr_Mxx + curr_Mux.T @ curr_K + curr_K.T @ curr_Mux
++                      + curr_K.T @ curr_Muu @ curr_K)
+             next_v = curr_Mxe + curr_K.T @ curr_Mue + (curr_Mux.T + curr_K.T @ curr_Muu) @ curr_k
+ 
++            solve_seconds += _time.perf_counter() - kernel_start
++
+             # print('P', curr_k)
+ 
+         # forward pass in time to compute the optimal trajectory
+@@ -794,19 +880,25 @@ class EQCLQR:
+             # take the current state
+             curr_x = state_traj_opt[t]
+             # apply the control law to compute the current control input
++            kernel_start = _time.perf_counter()
+             curr_u = curr_K @ curr_x + curr_k
++            solve_seconds += _time.perf_counter() - kernel_start
+             # apply the dynamics
+             curr_Fx = self.dynFx_t[t]
+             curr_Fu = self.dynFu_t[t]
+             curr_Fe = self.dynFe_t[t]
++            kernel_start = _time.perf_counter()
+             next_x = curr_Fx @ curr_x + curr_Fu @ curr_u + curr_Fe
++            solve_seconds += _time.perf_counter() - kernel_start
+             # store
+             state_traj_opt += [next_x]
+             control_traj_opt += [curr_u]
+ 
+         # output the trajectory
+         time = [k for k in range(horizon + 1)]
+-        opt_sol = {'state_traj_opt': state_traj_opt,
++        opt_sol = {'solve_seconds': solve_seconds,
++                   'timing_protocol': 'solve-kernels-v4',
++                   'state_traj_opt': state_traj_opt,
+                    'control_traj_opt': control_traj_opt,
+                    'time': time}
+ 

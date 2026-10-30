@@ -1,0 +1,80 @@
+{
+  "problem": "quadrotor",
+  "method": "acados",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 800,
+  "runtime_details": {
+    "adapter": "3b2887b7e837effa8fcb9babef33a96082cf607938d0f43c74165749c77f3d09",
+    "model": "1ffafb17810677b52635d8fcc609fe58ea3b5bec04c5f08ada60c0e43195eb86",
+    "library": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+    "library_sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+    "template": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\source\\interfaces\\acados_template\\acados_template\\__init__.py",
+    "casadi": "3.8.0",
+    "problem": "quadrotor",
+    "N": 40,
+    "dt": 0.05,
+    "tolerance": 1e-08,
+    "max_iterations": 500,
+    "native_libraries": {
+      "acados.dll": {
+        "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\acados.dll",
+        "path_source": "loaded Windows module",
+        "sha256": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa"
+      },
+      "frs_imitation_blasfeo.dll": {
+        "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_blasfeo.dll",
+        "path_source": "loaded Windows module",
+        "sha256": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08"
+      },
+      "frs_imitation_hpipm.dll": {
+        "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\bin\\frs_imitation_hpipm.dll",
+        "path_source": "loaded Windows module",
+        "sha256": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+      }
+    },
+    "native_build": {
+      "status": "binary-hashes-verified",
+      "manifest_path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\install\\build_manifest.json",
+      "manifest": {
+        "acados_version": "0.5.1",
+        "compiler": "MSVC 19.44.35226.0",
+        "generator": "Visual Studio 17 2022",
+        "build_type": "Release",
+        "platform": "x64",
+        "blasfeo_target": "GENERIC",
+        "hpipm_target": "GENERIC",
+        "openmp": false,
+        "linear_algebra": "HIGH_PERFORMANCE",
+        "matrix_format": "PANELMAJ",
+        "timing_protocol": "solve-kernels-v4",
+        "timing_boundary": "forward-and-backward-hpipm-kernels-only",
+        "capability": "frs_acados_hpipm_kernel_timer_enabled_v4",
+        "library_sha256": {
+          "acados.dll": "1ce1fe8bdf7a5be6de6671922fe138e285946700157e1684becc63d2af61e1fa",
+          "frs_imitation_blasfeo.dll": "2501c3f7e03816537d5952da64b4c78c920367d1fe46a401332e7723fc986d08",
+          "frs_imitation_hpipm.dll": "31c790c29deb6683869f48ba08c69d0ca06b89add4a2662a0ebceb0415ff6589"
+        },
+        "source_directory": "D:\\Desktop\\new hugdoc\\.codex-tmp\\acados-0.5.1",
+        "source_common_sha256": "a4c5a841a62d2533b61f7e59c07b49a1266db991ed995ea04d768ec6a6d1e457",
+        "cmake_cache": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.acados\\build\\CMakeCache.txt",
+        "timer_count_categories": [
+          "factor",
+          "solve",
+          "residual",
+          "reduction",
+          "condensing",
+          "vector",
+          "forward",
+          "adjoint",
+          "ipm_control"
+        ],
+        "qp_call_counter": "frs_acados_solve_timer_qp_calls_v4"
+      }
+    },
+    "strict_hpipm_kernel_timer": true,
+    "native_diagnostic_timing_protocol": "solve-kernels-v4",
+    "reported_timing_protocol": "solver-call-only-v1"
+  },
+  "train_seconds": 369.19793529983144
+}

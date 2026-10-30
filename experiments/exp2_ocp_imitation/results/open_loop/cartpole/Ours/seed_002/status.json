@@ -1,0 +1,8 @@
+{
+  "problem": "cartpole",
+  "method": "Ours",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 800,
+  "train_seconds": 80.75503129989374
+}

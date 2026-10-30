@@ -1,0 +1,14 @@
+pose_topic: /vrpn_client_node/limo_car0/pose
+velocity_topic: /vrpn_client_node/limo_car0/twist
+command_topic: /cmd_vel
+
+# The pasted LQR code divides VRPN position and velocity by 1000.
+# Change this to 1.0 only if your topics already use m and m/s.
+input_scale: 0.001
+state_timeout_s: 0.25
+yaw_hold_speed_mps: 0.02
+
+# World position corresponding to model reference (0, 0) at phase 0.
+reference_origin_x: 0.0
+reference_origin_y: 0.0
+initial_phase: 0.0

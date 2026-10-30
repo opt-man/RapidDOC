@@ -1,0 +1,61 @@
+{
+  "problem": "quadrotor",
+  "method": "CasADi",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 800,
+  "runtime_details": {
+    "kernel_protocol": "mumps-numeric-and-pd-arithmetic-v4",
+    "casadi_version": "3.8.0",
+    "casadi_git_revision": "83b3cec864e42c5b64a07e85d4adf91da71458b1",
+    "ipopt_version": "3.14.19",
+    "compiler": "g++.exe (Rev5, Built by MSYS2 project) 5.3.0",
+    "compiler_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\mingw5\\Library\\mingw-w64\\bin",
+    "casadi_source_directory": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\.casadi-ipopt-v4\\casadi-source",
+    "casadi_core_sha256": "2946a15fc1f08ae13a02b4483d865c681fc99ef6138b3e2429fbebc6b22e4ec2",
+    "library_sha256": {
+      "libfrs_casadi_ipopt_v4.dll": "0bd94fac428a5dfc2546069374c50c360b4b3638103e6fd17fdeeb63a72ed10b",
+      "libcasadi_nlpsol_ipopt_frs_v4.dll": "57d9bd6251a5ab3e9bee4c516bbdb7e3964b60dbfe4d531443bbb656defb4fe9"
+    },
+    "source_sha256": {
+      "third_party/ipopt-highres/src/Common/IpSolveKernelTimer.hpp": "12e32d293355ce021717106441ce4a7ea7ec8b29f964aab426e6c8603efb772c",
+      "third_party/ipopt-highres/src/Algorithm/LinearSolvers/IpMumpsSolverInterface.cpp": "d8ff5c979d4e3de2f54770ac98ec75f206f29e1639d11e46a3f4ecc57f55d25e",
+      "third_party/ipopt-highres/src/Algorithm/IpPDFullSpaceSolver.cpp": "a73287428bd6c2cb2e374bc25efc5dae31204542230d0d408420bcdfc4575310",
+      "third_party/ipopt-highres/src/LinAlg/IpVector.hpp": "581f78c93ca59c027e6dfd1ef3bbfe14d22d7a4eac5176bee286bd4dfb620fb4",
+      "third_party/ipopt-highres/src/LinAlg/IpDenseVector.cpp": "435941e2b4c1e39274399b0fc6a4fe74d2a513f4b611069d30f1ad89ef741f16",
+      "third_party/ipopt-highres/src/LinAlg/IpCompoundVector.cpp": "4166bd22fb1ef63a040256b4767d9a96adaaaee42cef6d88e2387514bdb5f223",
+      "third_party/ipopt-highres/src/LinAlg/IpMatrix.cpp": "59b9f8ce3003c5555f57251778977d3ece2f9bfacdff41fb7f9d0a89a42e23b8",
+      "third_party/ipopt-highres/src/LinAlg/IpExpansionMatrix.cpp": "e46e9ea3cb01c4ae5bb0a0d5bfc4f8f1e821209ebc6924ffd1dc1c684eb0487a",
+      "third_party/ipopt-highres/src/LinAlg/IpIdentityMatrix.cpp": "59310bde417c15fda6fa7409d8ba7744a9c9f06bf78c194cb4121005912ef8be",
+      "third_party/ipopt-highres/src/LinAlg/IpScaledMatrix.cpp": "fa446db08e85ba81d30b5368cf5b49ea7b689c7483e507db1b92652606380290",
+      "cmake/sipopt_timing_clock.cpp": "498ce254a0c109e9237f84586f01d213bff3260a56e0ec52ed1e67f234b73127",
+      "cmake/casadi_ipopt_v4/CMakeLists.txt": "6c401a7e70432881a5071da33c00a036ce4011aed4874ae1459ba735dbcc8ac8",
+      "cmake/casadi_ipopt_v4/config.h": "f621db893e0462795cd50ec57a3f7ef5a2115a8623fc8c255af535023f7f9b8d",
+      "cmake/casadi_ipopt_v4/casadi_nlpsol_ipopt_export.h": "330ba4b461ee5070f5b2c45f170b502449dcdbf98803b339873cdf501b04233f"
+    },
+    "numerical_dependency_sha256": {
+      "libcoinmumps-3.dll": "0b80e04ab36acba9527a48744d20fbf95591707710b829d0e5e5eb525adee362",
+      "libcoinmetis-2.dll": "b63b9852704322d9f58edc59e093e4471dc76f96fc8bced63499ff40f5dbe8fb",
+      "libcasadi-tp-openblas.dll": "d061ba2e707c65c3d0d78236238d8483154b8e4c684a28ebfc9c2f00dabd258e"
+    },
+    "casadi_interface_source_sha256": {
+      "ipopt_interface.cpp": "6ff8071f59ab0452731c9c7bf61b14fbaccbbdccfca3a4216c207400ad9f2b18",
+      "ipopt_interface.hpp": "8be0349df7b997facf1d6969e86b91545f3d66628fb99979d25b52217d4b9256",
+      "ipopt_interface_meta.cpp": "f1fe3f8d41b3bfa0841619dcc93dcd61a814c36dcd8670a34f53d55f00d59745",
+      "ipopt_nlp.cpp": "e45f56d17bb6397775516df912ad87519b929be3a536436d10905235dfbade77",
+      "ipopt_nlp.hpp": "1a59390ecb909abae4ba5032563ffdf149c84c31b7e0944598aa5060f0e05c1a",
+      "ipopt_runtime.hpp": "a4573418328718daff15ad43cd8650229c37624f16c39585e45b5992ebcc5cba"
+    },
+    "plugin": "ipopt_frs_v4",
+    "numerical_library_source": "unchanged installed CasADi wheel",
+    "kernel_categories": [
+      "numeric-factorization",
+      "backsolve",
+      "residual-arithmetic",
+      "reduction-arithmetic"
+    ],
+    "native_diagnostic_timing_protocol": "solve-kernels-v4",
+    "reported_timing_protocol": "solver-call-only-v1"
+  },
+  "train_seconds": 232.16900009987876
+}

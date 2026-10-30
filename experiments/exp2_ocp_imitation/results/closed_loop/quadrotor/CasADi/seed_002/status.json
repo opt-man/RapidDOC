@@ -1,0 +1,9 @@
+{
+  "problem": "quadrotor",
+  "method": "CasADi",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 500,
+  "train_seconds": 260.3090615012916,
+  "skipped_completed": true
+}

@@ -1,0 +1,9 @@
+{
+  "problem": "quadrotor",
+  "method": "Ours",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 500,
+  "train_seconds": 120.05191090109292,
+  "skipped_completed": true
+}

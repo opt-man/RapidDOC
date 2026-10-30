@@ -1,0 +1,9 @@
+# Python dependencies; native solvers and ROS are installed separately.
+numpy
+scipy
+casadi==3.8.0
+matplotlib
+threadpoolctl
+Pillow
+opencv-python
+reportlab

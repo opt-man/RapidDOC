@@ -1,0 +1,10 @@
+{
+  "model_id": "e3c18be8b2e099a224994a1249b13fcdd7631ec34d3cb7e46ac8d03d58bb8a5f",
+  "backend": "acados",
+  "simulation_only": true,
+  "epochs": 500,
+  "steps": 707,
+  "learning_rate": 0.0080000000000000002,
+  "gradient": "full closed-loop implicit reverse accumulation",
+  "objective": "mean(0.5 position_error_squared + 0.01 (1-cos(heading_error)) + 0.05 speed_error_squared)"
+}

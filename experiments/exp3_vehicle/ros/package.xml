@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>figure8_mpc_ros1</name>
+  <version>1.0.0</version>
+  <description>ROS1 closed-loop figure-eight MPC controller.</description>
+  <maintainer email="maintainer@example.com">maintainer</maintainer>
+  <license>Proprietary</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+</package>

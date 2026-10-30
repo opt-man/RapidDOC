@@ -1,0 +1,15 @@
+# Extend the pre-existing isolated timer to native initial-state solves.
+set(path "${SOURCE_DIR}/acados/ocp_nlp/ocp_nlp_common.c")
+file(READ "${path}" code)
+if(code MATCHES "frs_initial_state_timer")
+  return()
+endif()
+set(needle [=[    config->qp_solver->eval_forw_sens(config->qp_solver, dims->qp_solver, mem->qp_in, qp_seed, tmp_qp_out,
+                            opts->qp_solver_opts, mem->qp_solver_mem, work->qp_work);]=])
+string(FIND "${code}" "${needle}" position)
+if(position EQUAL -1)
+  message(FATAL_ERROR "acados initial-state timer patch does not match source")
+endif()
+set(replacement "    { acados_timer frs_initial_state_timer;\n    if(frs_acados_enabled) acados_tic(&frs_initial_state_timer);\n${needle}\n    frs_acados_record(&frs_initial_state_timer); }")
+string(REPLACE "${needle}" "${replacement}" code "${code}")
+file(WRITE "${path}" "${code}")

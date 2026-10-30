@@ -1,0 +1,27 @@
+{
+  "problem": "robotarm",
+  "method": "Ours",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 500,
+  "runtime_details": {
+    "native_diagnostic_timing_protocol": "solve-kernels-v4",
+    "forward_timer": "private FATROP numerical call-site counters",
+    "binaries": {
+      "imitation_native.dll": {
+        "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\imitation_native.dll",
+        "sha256": "b7a6a5ddf28f2016edd0a5bf05dbe6ce0db8d9d9e5c6d28c3f841f3ec8ef3355"
+      },
+      "fatrop.dll": {
+        "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\fatrop.dll",
+        "sha256": "898197d0fdea5997667f1c102bc5635066489b4780c7033118cbfd80d1b79d83"
+      },
+      "factor_reuse_solver.dll": {
+        "path": "D:\\Desktop\\new hugdoc\\FATROPFactorReuse\\bin\\factor_reuse_solver.dll",
+        "sha256": "86358f931d9cd1941dd2429093907639edfa3756b4dee0c81ae5abf1fcb1e4c8"
+      }
+    },
+    "reported_timing_protocol": "solver-call-only-v1"
+  },
+  "train_seconds": 102.9759522008244
+}

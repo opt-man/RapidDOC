@@ -1,0 +1,8 @@
+{
+  "problem": "cartpole",
+  "method": "acados",
+  "seed": 2,
+  "status": "ok",
+  "last_epoch": 800,
+  "train_seconds": 180.94443310028873
+}

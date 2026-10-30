@@ -1,0 +1,23 @@
+<launch>
+  <arg name="theta_file"/>
+  <arg name="log_file"/>
+  <arg name="x_limit" default="1.25"/>
+  <arg name="y_limit" default="0.75"/>
+  <arg name="input_scale" default="0.001"/>
+  <arg name="pose_topic" default="/vrpn_client_node/limo_car0/pose"/>
+  <arg name="velocity_topic" default="/vrpn_client_node/limo_car0/twist"/>
+  <arg name="command_topic" default="/cmd_vel"/>
+
+  <node pkg="figure8_mpc_ros1" type="figure8_mpc_controller"
+        name="figure8_mpc_controller" output="screen" required="true">
+    <rosparam command="load" file="$(find figure8_mpc_ros1)/config/controller.yaml"/>
+    <param name="theta_file" value="$(arg theta_file)"/>
+    <param name="log_file" value="$(arg log_file)"/>
+    <param name="x_limit" value="$(arg x_limit)"/>
+    <param name="y_limit" value="$(arg y_limit)"/>
+    <param name="input_scale" value="$(arg input_scale)"/>
+    <param name="pose_topic" value="$(arg pose_topic)"/>
+    <param name="velocity_topic" value="$(arg velocity_topic)"/>
+    <param name="command_topic" value="$(arg command_topic)"/>
+  </node>
+</launch>
