@@ -31,7 +31,7 @@ The forward Riccati cache supplies the fixed solve action
 $$
 \mathcal S_F(v)
 :=
-\operatorname{CachedSolve}(\mathcal C_F,v).
+\mathrm{CachedSolve}(\mathcal C_F,v).
 $$
 
 For a nonzero loss seed $g$, the cached candidate and its target-residual test are
