@@ -302,15 +302,16 @@
     "experiments/exp3_vehicle/training/src/experiment.cpp": "5f98a617077702e383f56d51e35a166da9d2fdc4c8f98e5ae9b369212738a71e",
     "experiments/exp3_vehicle/training/src/model.c": "450c32a6e8c1fd7058b05157e03502cc8c59d568467623ecbe5cb041905646d2",
     "experiments/exp3_vehicle/training/src/ours.cpp": "a385a24ca99c84e25fc673d18933c0325ceb65332f5a3cf12112c6bb2305993e",
-    "paper/figures/fig1_framework.pdf": "73ac5f9eeeb57a59a7bdb1b839d8b20311b364e3bd8d4c56264a2dfc078b6e80",
-    "paper/figures/fig2_factor_reuse_ablation.pdf": "fde5a308c5ed7b432d6b8da3b3c9a66a2180188af8cfadc065bf05dd203e1046",
-    "paper/figures/fig3_open_loop_imitation_learning.pdf": "06ad3d8d2f7d71407ed072703174fb2ba6fee7e4227162e72e3525b26b26e804",
-    "paper/figures/fig4_closed_loop_imitation_learning.pdf": "7a0cd718de22f0e2b4020a128aaec748c77f8c65fb86e5b086a70d5ae7c859a7",
-    "paper/figures/fig5_figure8_learning.pdf": "41711673868a8e49ea11135b5bcda79bf9c19585f456276ff65aa1f593cbd7c9",
-    "paper/figures/fig6_vehicle_before_after.pdf": "26e8db50783b97a0266fd2a816e1c3011ba8474749d39b24b47468dd238c1014",
-    "paper/RapidDOC.pdf": "7d075e1afc25410c4ab3733719b91f2e381cdca604941f55ab2b3ab67c242951",
     "rapidoc/factor_reuse_solver.cpp": "0ca470a561e44ca4baac30aa3ae07a287043d46f6b5fe3dcce4723a1aaf81242",
     "rapidoc/factor_reuse_solver.h": "1c000cacfc887dcf87a9357cb4563ec1b2c84706cefb3765f61c0b3368ecd445",
-    "rapidoc/patches/fatrop_cache_export.patch": "7c696ceb65d3f28f1ece5d4c8bd6a42279ec0ec35cf689f6866bd0373ede64ea"
-  }
+    "rapidoc/patches/fatrop_cache_export.patch": "7c696ceb65d3f28f1ece5d4c8bd6a42279ec0ec35cf689f6866bd0373ede64ea",
+    "assets/figures/fig1_framework.png": "ac7093e6c9cdae2b446a62d924de863dffc8e24167d6e97a3654d1552d44bd7c",
+    "assets/figures/fig2_factor_reuse_ablation.png": "9ff2208e256ad93251e7e1a52a43f42fe6eaf99b60ece93a4dce1f699160ddca",
+    "assets/figures/fig3_open_loop_imitation_learning.png": "d09e5b307a74d3e2888a5f84f5d0795784b647688e6c8dbe1aa61f3614a735ed",
+    "assets/figures/fig4_closed_loop_imitation_learning.png": "875d18084df35edaffcb5d70667d2c6c48270a9f6f2f62e96941654987f3d9da",
+    "assets/figures/fig5_figure8_learning.png": "cdc8a21c997297acd51b77e2e715e3ee8e0104e99b2d28341d40e52e9acb8d2f",
+    "assets/figures/fig6_vehicle_before_after.png": "eeee45865f517af50bb7895dad14eda9e0db5998b5ca766130269ef9c07e0203",
+    "assets/figures/provenance.json": "ea46693b931c0af2939fb50d5d6199d562f74a4b0a871c44922fc034bc1bf162"
+  },
+  "release_scope": "Code, experiments, original paper figures and video; full manuscript and LaTeX sources excluded."
 }

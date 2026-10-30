@@ -5,7 +5,7 @@
 Xiangda Zhu, Yuankun Chen, Zifei Nie*, and Yi Chang*  
 *Corresponding authors. Contact: [zifei_nie@jlu.edu.cn](mailto:zifei_nie@jlu.edu.cn).
 
-[Paper](paper/RapidDOC.pdf) · [Video](https://youtu.be/b53gcrjdS7c) · [Installation](docs/INSTALL.md) · [Tutorials](tutorials/README.md) · [Experiments](docs/REPRODUCIBILITY.md)
+[Video](https://youtu.be/b53gcrjdS7c) · [Installation](docs/INSTALL.md) · [Tutorials](tutorials/README.md) · [Experiments](docs/REPRODUCIBILITY.md)
 
 RapidDOC accelerates implicit differentiation through optimal-control solutions by reusing the forward solver's Riccati factorization. It checks the cached adjoint against the target equation and, when necessary, corrects it with right-preconditioned GMRES using the same factors.
 
@@ -13,18 +13,56 @@ This repository includes the C++ implementation, Python binding, FATROP integrat
 
 ## Demonstration
 
-[![Physical vehicle results — watch the RapidDOC demonstration](assets/video_preview.png)](https://youtu.be/b53gcrjdS7c)
+[![Physical vehicle results — watch the RapidDOC demonstration](assets/figures/fig6_vehicle_before_after.png)](https://youtu.be/b53gcrjdS7c)
 
 [Watch on YouTube](https://youtu.be/b53gcrjdS7c) · [Download the demonstration video](assets/RapidDOC_demo.mp4)  
 Cover: the paper's physical vehicle experiment figure.
 
 ## Project Summary
 
-For a prescribed adjoint system $K_T a=b$, RapidDOC applies a cached forward-factor solve $B$ to obtain an initial candidate $a_0=Bb$. If its target residual is too large, it solves the correction equation
+The notation and equations below follow the accompanying manuscript. The prescribed target adjoint is
 
-$$K_T B y=b-K_Ta_0,\qquad a=a_0+By.$$
+$$
+K_B^\top a^\star=g.
+$$
 
-The forward factors remain fixed during this solve. The target operator $K_T$ is unchanged, even when it differs from the operator associated with the cached forward factors. See the [paper](paper/RapidDOC.pdf) for the mathematical setting and guarantees.
+The forward Riccati cache supplies the fixed solve action
+
+$$
+\mathcal S_F(v)
+:=
+\operatorname{CachedSolve}(\mathcal C_F,v).
+$$
+
+For a nonzero loss seed $g$, the cached candidate and its target-residual test are
+
+$$
+a_0:=\mathcal S_F(g).
+$$
+
+$$
+r_0:=g-K_B^\top a_0,
+\qquad
+\rho_0:=\frac{\|r_0\|_2}{\|g\|_2}.
+$$
+
+If $\rho_0>\varepsilon$, GMRES solves the right-preconditioned correction equation
+
+$$
+K_B^\top\mathcal S_F(y)=r_0,
+\qquad
+a=a_0+\mathcal S_F(y).
+$$
+
+The parameter gradient is then obtained from the target adjoint using
+
+$$
+\frac{\mathrm d\mathcal L}{\mathrm d\theta}
+=
+\nabla_\theta\mathcal L-G_B^\top a^\star.
+$$
+
+The target operator $K_B$ and cached solve action $\mathcal S_F$ remain fixed during the backward solve. Every returned candidate is checked against the prescribed target equation. The manuscript PDF and LaTeX sources are not included in this code repository.
 
 The implementation provides:
 
@@ -34,21 +72,9 @@ The implementation provides:
 - Open- and closed-loop OCP imitation-learning experiments.
 - Native vehicle training, ROS1 controller sources, and recorded physical runs.
 
-```mermaid
-flowchart LR
-    OCP[Optimal-control problem] --> F[FATROP forward solve]
-    F --> S[Solution and local derivatives]
-    F --> C[Retained Riccati factors]
-    S --> T[Target adjoint equation]
-    C --> I[Cached adjoint candidate]
-    T --> R[Check target residual]
-    I --> R
-    R -->|Within tolerance| G[Adjoint and parameter gradient]
-    R -->|Correction needed| M[Right-preconditioned GMRES]
-    C --> M
-    T --> M
-    M --> G
-```
+![Fig. 1: RapidDOC framework from the manuscript](assets/figures/fig1_framework.png)
+
+*Fig. 1. Original manuscript framework; rasterized for display.*
 
 ## File Structure
 
@@ -64,8 +90,7 @@ examples/                        Offline frozen-data inspection
 tests/                           Offline data-integrity and operator checks
 tools/                           Artifact verifier and environment diagnostics
 docs/                            Installation, API, reproduction and upload guides
-assets/                          Video preview and downloadable demonstration
-paper/                           Manuscript, bibliography and paper figures
+assets/                          Original paper figures and demonstration video
 ```
 
 ## Installation
@@ -127,7 +152,7 @@ Each experiment retains its inputs, settings, recorded outputs and plotting code
 
 | Paper item | Entry point | Recorded output |
 |---|---|---|
-| Fig. 1: method overview | [Manuscript](paper/RapidDOC.tex) | [Framework](paper/figures/fig1_framework.pdf) |
+| Fig. 1: method overview | Method summary above | [Original framework figure](assets/figures/fig1_framework.png) |
 | Fig. 2: factor-reuse ablation | [experiment.py](experiments/exp1_factor_reuse_ablation/experiment.py), [plot.py](experiments/exp1_factor_reuse_ablation/plot.py) | [Summary CSV](experiments/exp1_factor_reuse_ablation/results/gmres_real_ocp_ablation_summary.csv) |
 | Fig. 3: open-loop learning | [imitation_learning.py](experiments/exp2_ocp_imitation/imitation_learning.py), `run` / `plot` | [Learning curves](experiments/exp2_ocp_imitation/figures/fig3_open_loop_imitation_learning.pdf) |
 | Fig. 4 and Table I: closed-loop learning | Same script, `closed-loop` / `plot-closed-loop` | [Closed-loop curves](experiments/exp2_ocp_imitation/figures/fig4_closed_loop_imitation_learning.pdf), [records](experiments/exp2_ocp_imitation/results/closed_loop) |
@@ -145,6 +170,8 @@ python experiments/exp1_factor_reuse_ablation/plot.py
 
 The solve requires the native core and CasADi/MUMPS for the independent reference. Plotting uses the recorded CSV files.
 
+![Fig. 2: original factor-reuse ablation](assets/figures/fig2_factor_reuse_ablation.png)
+
 ### Experiment 2: OCP Imitation Learning
 
 Prepare the native imitation backend, then check installed backends and run a small learning example:
@@ -157,7 +184,9 @@ python experiments/exp2_ocp_imitation/imitation_learning.py closed-loop --method
 
 `--quick` is a smoke configuration. Full paper settings and the instrumented Safe-PDP, IPOPT and acados baselines are described in the [experiment guide](experiments/exp2_ocp_imitation/EXPERIMENT.md).
 
-![Recorded open-loop imitation-learning results](experiments/exp2_ocp_imitation/figures/fig3_open_loop_imitation_learning.png)
+![Fig. 3: original open-loop imitation-learning results](assets/figures/fig3_open_loop_imitation_learning.png)
+
+![Fig. 4: original closed-loop imitation-learning results](assets/figures/fig4_closed_loop_imitation_learning.png)
 
 ### Experiment 3: Vehicle Learning and Deployment
 
@@ -166,6 +195,10 @@ python experiments/exp3_vehicle/plot_learning.py
 ```
 
 This redraws the recorded learning histories. Native training and ROS1 deployment target Linux; follow the [vehicle guide](experiments/exp3_vehicle/README.md) for builds, model identity, topics and controller settings. The final demonstration video is included. Rebuilding camera-frame composites requires the original raw recording, which is not bundled.
+
+![Fig. 5: original vehicle-learning results](assets/figures/fig5_figure8_learning.png)
+
+All six displayed figures come from the manuscript's final figure PDFs. Only the file format was converted for web display; layouts, curves and annotations were not redrawn. Source figure hashes and conversion details are in [figure provenance](assets/figures/provenance.json).
 
 ## Solver Parameters
 

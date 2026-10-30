@@ -29,3 +29,6 @@ runs/
 **/regenerated/
 **/figures/generated/
 **/video_composite/generated/
+
+# Keep the full manuscript outside the code distribution.
+/paper/

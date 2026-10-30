@@ -5,7 +5,7 @@ Executed locally on 2026-10-30, Windows x64, Python 3.13.12, MSVC 2022. CI is co
 | Check | Result |
 |---|---|
 | Frozen input integrity | 96 cases checked (32 per task): dimensions, finite values, symmetric target Hessians |
-| Immutable file integrity | 310 SHA256 hashes verified |
+| Immutable file integrity | 310 release-file SHA256 hashes verified (303 retained archive files and 7 figure assets/provenance files) |
 | Python source parsing | Passed |
 | Offline unit tests | 4 passed |
 | Python wheel build | Passed with `pip wheel . --no-deps --no-build-isolation` |
@@ -13,7 +13,7 @@ Executed locally on 2026-10-30, Windows x64, Python 3.13.12, MSVC 2022. CI is co
 | Offline plots | Factor-reuse ablation and vehicle learning plots generated |
 | Native core | Release build passed from the pinned FATROP source plus the supplied cache-export patch |
 | Native smoke solve | Three tasks, one frozen instance each, three methods: 9/9 reached relative target residual <= 1e-6 |
-| Publication assets | PDF and local MP4 signatures checked; YouTube link present |
+| Publication assets | Six manuscript PNG figures and local MP4 signatures checked; YouTube link present; manuscript directory excluded |
 
 ## Native build provenance
 
@@ -46,3 +46,7 @@ python experiments/exp1_factor_reuse_ablation/experiment.py --problems cartpole 
 The complete smoke summary is in [native_smoke_summary.csv](docs/validation/native_smoke_summary.csv). This is an entry-point and numerical-correctness check, not a statistically meaningful timing benchmark. Forward optimization was not rerun: these solves use the supplied frozen post-forward targets and caches. A CasADi/MUMPS solve supplies the independent adjoint reference. This does not constitute a fresh end-to-end finite-difference gradient test.
 
 Full imitation-learning training, external instrumented baselines, physical ROS experiments and a fresh LaTeX rebuild were not run during this repository preparation. Recorded paper results remain unchanged. The demonstration MP4 is the existing supplied video, not a newly generated experiment.
+
+## Publication-scope update
+
+The full manuscript PDF, LaTeX, bibliography and class file were moved outside the code repository. README equations are copied from the manuscript equation environments, preserving its notation. The custom Mermaid diagram was replaced with original Fig. 1. All six figures were rendered directly from the manuscript figure PDFs with Poppler at 180 dpi. Figure provenance records source-PDF and output-PNG hashes. Numerical sources, frozen cases and recorded experimental results were not modified. This update does not rewrite historical commits.

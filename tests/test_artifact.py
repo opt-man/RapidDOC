@@ -21,8 +21,11 @@ class ArtifactTests(unittest.TestCase):
         from rapidoc import solver
         self.assertIsNone(solver._library)
         self.assertIn('factor_reuse_solver',solver.DLL.name)
-    def test_paper_and_video(self):
-        self.assertTrue((ROOT/'paper/RapidDOC.pdf').read_bytes().startswith(b'%PDF'))
+    def test_paper_figures_and_video(self):
+        self.assertFalse((ROOT/'paper').exists())
+        for figure in (ROOT/'assets/figures').glob('*.png'):
+            self.assertTrue(figure.read_bytes().startswith(b'\x89PNG\r\n\x1a\n'))
+        self.assertEqual(len(list((ROOT/'assets/figures').glob('*.png'))), 6)
         self.assertIn(b'ftyp',(ROOT/'assets/RapidDOC_demo.mp4').read_bytes()[:64])
         self.assertIn('https://youtu.be/b53gcrjdS7c',(ROOT/'README.md').read_text(encoding='utf-8'))
 if __name__=='__main__':unittest.main()

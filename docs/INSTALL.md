@@ -43,13 +43,6 @@ cmake --build build/imitation --config Release --parallel
 
 Set `IMITATION_NATIVE_DLL` to the resulting `imitation_native` library. The retained experiment defaults target a Windows DLL, so non-Windows users should set the path explicitly. Instrumented CasADi/IPOPT, acados and Safe-PDP are configured separately as described in `experiments/exp2_ocp_imitation/EXPERIMENT.md`. Full paper timing reproduction requires the original numerical-kernel hooks and a manifest matching the actual build; ordinary package wheels do not provide these hooks.
 
-## Vehicle and paper
+## Vehicle
 
 Vehicle training and ROS1 target Linux; see `experiments/exp3_vehicle/README.md` for native paths, topics, parameter files and the model ID. Offline plotting does not require vehicle hardware. This preparation does not execute a physical controller.
-
-To rebuild the paper, install a LaTeX distribution with latexmk and run:
-
-```bash
-cd paper
-latexmk -pdf -interaction=nonstopmode -halt-on-error RapidDOC.tex
-```

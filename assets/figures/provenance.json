@@ -1,0 +1,36 @@
+{
+  "description": "Unaltered paper figures rasterized for the GitHub README; no full manuscript is distributed.",
+  "renderer": "Poppler pdftoppm, PNG, 180 dpi, single page",
+  "figures": {
+    "fig1_framework.png": {
+      "source_figure": "fig1_framework.pdf",
+      "source_pdf_sha256": "73ac5f9eeeb57a59a7bdb1b839d8b20311b364e3bd8d4c56264a2dfc078b6e80",
+      "png_sha256": "ac7093e6c9cdae2b446a62d924de863dffc8e24167d6e97a3654d1552d44bd7c"
+    },
+    "fig2_factor_reuse_ablation.png": {
+      "source_figure": "fig2_factor_reuse_ablation.pdf",
+      "source_pdf_sha256": "fde5a308c5ed7b432d6b8da3b3c9a66a2180188af8cfadc065bf05dd203e1046",
+      "png_sha256": "9ff2208e256ad93251e7e1a52a43f42fe6eaf99b60ece93a4dce1f699160ddca"
+    },
+    "fig3_open_loop_imitation_learning.png": {
+      "source_figure": "fig3_open_loop_imitation_learning.pdf",
+      "source_pdf_sha256": "06ad3d8d2f7d71407ed072703174fb2ba6fee7e4227162e72e3525b26b26e804",
+      "png_sha256": "d09e5b307a74d3e2888a5f84f5d0795784b647688e6c8dbe1aa61f3614a735ed"
+    },
+    "fig4_closed_loop_imitation_learning.png": {
+      "source_figure": "fig4_closed_loop_imitation_learning.pdf",
+      "source_pdf_sha256": "7a0cd718de22f0e2b4020a128aaec748c77f8c65fb86e5b086a70d5ae7c859a7",
+      "png_sha256": "875d18084df35edaffcb5d70667d2c6c48270a9f6f2f62e96941654987f3d9da"
+    },
+    "fig5_figure8_learning.png": {
+      "source_figure": "fig5_figure8_learning.pdf",
+      "source_pdf_sha256": "41711673868a8e49ea11135b5bcda79bf9c19585f456276ff65aa1f593cbd7c9",
+      "png_sha256": "cdc8a21c997297acd51b77e2e715e3ee8e0104e99b2d28341d40e52e9acb8d2f"
+    },
+    "fig6_vehicle_before_after.png": {
+      "source_figure": "fig6_vehicle_before_after.pdf",
+      "source_pdf_sha256": "26e8db50783b97a0266fd2a816e1c3011ba8474749d39b24b47468dd238c1014",
+      "png_sha256": "eeee45865f517af50bb7895dad14eda9e0db5998b5ca766130269ef9c07e0203"
+    }
+  }
+}
