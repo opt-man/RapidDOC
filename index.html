@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>RapidDOC — Riccati-Preconditioned Differentiable Optimal Control</title>
+  <meta name="description" content="Riccati-preconditioned implicit differentiation for differentiable optimal control under operator mismatch. Research from Jilin University.">
+  <meta name="theme-color" content="#08090b">
+  <meta property="og:title" content="RapidDOC — Differentiable Optimal Control">
+  <meta property="og:description" content="Reuse the forward factorization. Preserve the target derivative. Explore the method, benchmarks, and physical vehicle experiments.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://opt-man.github.io/RapidDOC/assets/social-preview.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:url" content="https://opt-man.github.io/RapidDOC/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="citation_title" content="RapidDOC: Riccati-Preconditioned Implicit Differentiation for Differentiable Optimal Control under Operator Mismatch">
+  <meta name="citation_author" content="Zhu, Xiangda">
+  <meta name="citation_author" content="Chen, Yuankun">
+  <meta name="citation_author" content="Nie, Zifei">
+  <meta name="citation_author" content="Chang, Yi">
+  <meta name="citation_pdf_url" content="https://opt-man.github.io/RapidDOC/assets/RapidDOC.pdf">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://opt-man.github.io/RapidDOC/">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;650;700;750;800&family=Inter+Tight:wght@500;600;650;700;750;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="refinements.css">
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#overview">Skip to content</a>
+  <nav class="nav" aria-label="Main navigation">
+    <a class="brand" href="#top" aria-label="RapidDOC home"><svg viewBox="0 0 32 24" aria-hidden="true"><path d="M3 12c0-9 9-10 13 0s13 9 13 0-9-10-13 0S3 21 3 12Z"/></svg>RapidDOC</a>
+    <div class="nav-links"><a href="#method">Method</a><a href="#results">Results</a><a href="#hardware">Hardware</a></div>
+    <div class="nav-actions"><a class="nav-paper" href="assets/RapidDOC.pdf" target="_blank" rel="noopener">Paper <span aria-hidden="true">↗</span></a><a class="nav-code" href="https://github.com/opt-man/RapidDOC" target="_blank" rel="noopener">Code <span aria-hidden="true">↗</span></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="Open section navigation" aria-expanded="false" aria-controls="mobile-nav"><span></span><span></span></button></div>
+  </nav>
+  <div class="mobile-nav" id="mobile-nav" hidden><a href="#overview">Overview <span>01</span></a><a href="#method">Method <span>02</span></a><a href="#results">Results <span>03</span></a><a href="#hardware">Physical experiment <span>04</span></a><a href="#citation">Citation <span>05</span></a></div>
+
+  <main>
+    <header class="hero" id="top">
+      <div class="hero-aura" aria-hidden="true"></div>
+      <div class="hero-layout">
+        <div class="hero-copy">
+          <p class="eyebrow"><span class="research-dot"></span> RAPIDDOC <span class="hero-slash">/</span> JILIN UNIVERSITY</p>
+          <h1>Reuse the structure.<br><span class="gradient">Keep the derivative.</span></h1>
+          <p class="hero-description">Efficient differentiation through optimal control,<br class="desktop-break"> powered by the work already done in the forward solve.</p>
+          <p class="paper-title">Riccati-Preconditioned Implicit Differentiation for Differentiable Optimal Control under Operator Mismatch</p>
+          <div class="authors"><span>Xiangda Zhu</span><span>Yuankun Chen</span><span>Zifei Nie<sup>*</sup></span><span>Yi Chang<sup>*</sup></span></div>
+          <p class="affiliation">School of Artificial Intelligence, Jilin University<br><sup>*</sup> Corresponding authors</p>
+          <div class="hero-actions"><a class="button primary" href="assets/RapidDOC.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 2h7l4 4v12H5zM12 2v5h4M8 11h5M8 14h5"/></svg> Read the paper <span aria-hidden="true">↗</span></a><a class="button secondary" href="https://github.com/opt-man/RapidDOC" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18"/></svg> Code</a></div>
+        </div>
+        <div class="hero-media">
+          <div class="media-heading"><span>FROM THEORY TO PHYSICAL MOTION</span><span class="live-label"><i></i> EXPERIMENT</span></div>
+          <figure class="teaser">
+            <video id="teaser" muted loop playsinline preload="metadata" poster="assets/vehicle-poster.jpg" aria-label="Physical vehicle tracking after learning; five times playback speed"><source src="assets/rapidoc-teaser.mp4" type="video/mp4"></video>
+            <div class="teaser-shade"></div><div class="teaser-caption"><span class="video-dot"></span> FIGURE-EIGHT TRACKING <span class="speed-note">5× PLAYBACK</span></div>
+            <button class="teaser-toggle" id="teaser-toggle" aria-label="Play demonstration"><span aria-hidden="true">▶</span></button>
+          </figure>
+          <div class="media-foot"><span>Learned in simulation. Deployed on hardware.</span><a href="#hardware" aria-label="Explore the physical vehicle experiment">View experiment <span aria-hidden="true">↗</span></a></div>
+          <div class="hero-target"><div><span class="mini-label">THE TARGET STAYS FIXED</span><p class="math">K<sub>B</sub><sup>⊤</sup>a<sup>⋆</sup> = g</p></div><span class="target-caption">Forward factors accelerate<br>the backward solve.</span></div>
+        </div>
+      </div>
+      <div class="hero-bottom"><span>DIFFERENTIABLE OPTIMAL CONTROL</span><a href="#overview">Explore the research <span aria-hidden="true">↓</span></a><span>RESEARCH / 2026</span></div>
+    </header>
+
+    <section class="overview section" id="overview" aria-labelledby="overview-title">
+      <div class="section-intro overview-intro reveal"><div><p class="eyebrow">01 / THE IDEA</p><h2 id="overview-title">Already computed.<br><span class="dim">Still valuable.</span></h2></div><p class="lede">A structured optimal-control solver computes a useful factorization. RapidDOC carries that information into the backward pass—even when the forward and backward operators differ.</p></div>
+      <div class="overview-equation reveal"><span>Forward optimization</span><span class="flow-arrow" aria-hidden="true">→</span><span class="accent">Retained Riccati cache</span><span class="flow-arrow" aria-hidden="true">→</span><span>Faster implicit differentiation</span></div>
+      <div class="headline-stats reveal"><div><strong class="gradient">40.5–83.1<span>%</span></strong><p>less total solver-call time</p><small>Closed-loop learning, versus the fastest competing method on each task.</small></div><div><strong>3</strong><p>constrained robotic tasks</p><small>CartPole, Quadrotor, and Robot Arm, with comparable learning behavior.</small></div><div><strong>6.09<span> cm</span></strong><p>median physical tracking RMSE</p><small>Down from 22.75 cm after objective learning in the figure-eight experiment.</small></div></div>
+    </section>
+
+    <section class="method-section section" id="method" aria-labelledby="method-title">
+      <div class="section-intro reveal"><p class="eyebrow">02 / THE METHOD</p><h2 id="method-title">One cache.<br><span class="gradient">A better backward pass.</span></h2><p class="lede">Reuse is an acceleration mechanism. The prescribed target adjoint equation continues to define the derivative.</p></div>
+      <div class="method-layout reveal">
+        <div class="method-steps" role="tablist" aria-label="Method steps" aria-orientation="vertical">
+          <button id="step-tab-0" class="method-step active" role="tab" aria-selected="true" aria-controls="method-panel" data-step="0"><span class="step-index">01</span><span><strong>Retain.</strong><small>Keep the last available generalized Riccati factorization from the forward solve.</small></span></button>
+          <button id="step-tab-1" class="method-step" role="tab" aria-selected="false" aria-controls="method-panel" data-step="1" tabindex="-1"><span class="step-index">02</span><span><strong>Initialize. Check.</strong><small>Construct a cached adjoint candidate and evaluate its residual under the target operator.</small></span></button>
+          <button id="step-tab-2" class="method-step" role="tab" aria-selected="false" aria-controls="method-panel" data-step="2" tabindex="-1"><span class="step-index">03</span><span><strong>Precondition.</strong><small>When needed, use the same cache as a fixed right preconditioner for GMRES.</small></span></button>
+        </div>
+        <div class="method-visual" id="method-panel" role="tabpanel" aria-labelledby="step-tab-0" tabindex="0" data-stage="0">
+          <div class="target-fixed"><span class="status-dot"></span> TARGET EQUATION · UNCHANGED</div>
+          <div class="math target-equation">K<sub>B</sub><sup>⊤</sup> a<sup>⋆</sup> = g</div>
+          <div class="diagram-flow"><div class="diagram-node forward-node"><small>FORWARD PASS</small><strong>OCP solve</strong></div><span class="diagram-arrow">→</span><div class="diagram-node cache-node"><small>RETAINED INFORMATION</small><strong>Riccati cache</strong><span class="math">𝒞<sub>F</sub></span></div></div>
+          <div class="cache-down" aria-hidden="true">↓</div>
+          <div class="diagram-node adjoint-node"><small>BACKWARD PASS</small><strong id="method-node-title">Useful structure, already computed.</strong><div class="math" id="method-equation">𝒮<sub>F</sub>(v) := CachedSolve(𝒞<sub>F</sub>, v)</div></div>
+          <p class="method-detail" id="method-detail">Retain the forward factors and expose their solve action. A fresh target-system factorization is not required.</p>
+          <div class="method-progress" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+        </div>
+      </div>
+      <div class="theory-note reveal"><span class="mini-label">THE ANALYSIS</span><p>A cache-action error operator, <span class="math">E<sub>F</sub> = I − K<sub>B</sub><sup>⊤</sup>𝒮<sub>F</sub></span>, characterizes directional exactness, the preconditioned iteration, and the link between the target residual and outer-gradient error.</p><div class="theory-links"><a href="assets/RapidDOC.pdf#page=4" target="_blank" rel="noopener">Explore the analysis <span aria-hidden="true">↗</span></a><button type="button" class="text-link" data-figure="assets/fig1_framework.png" data-caption="The complete forward–backward framework. Original paper, Fig. 1.">View the full framework <span aria-hidden="true">↗</span></button></div></div>
+    </section>
+
+    <section class="results-section section" id="results" aria-labelledby="results-title">
+      <div class="section-intro reveal"><p class="eyebrow">03 / COMPUTATIONAL RESULTS</p><h2 id="results-title">Retained structure.<br><span class="gradient">Measured speed.</span></h2><p class="lede">Compare reuse, target-system refactorization, and zero-start unpreconditioned GMRES. The target system and residual tolerance are the same.</p></div>
+      <div class="chart-block reveal">
+        <div class="chart-topline"><div><h3>Backward time</h3><p>Factorization-reuse ablation</p></div><div class="tabs" id="task-tabs" role="tablist" aria-label="Ablation task"><button role="tab" aria-selected="true" aria-controls="ablation-panel" id="task-cartpole" data-task="0">CartPole</button><button role="tab" aria-selected="false" aria-controls="ablation-panel" id="task-quadrotor" data-task="1" tabindex="-1">Quadrotor</button><button role="tab" aria-selected="false" aria-controls="ablation-panel" id="task-arm" data-task="2" tabindex="-1">Robot Arm</button></div></div>
+        <div id="ablation-panel" role="tabpanel" aria-labelledby="task-cartpole"><div class="chart-legend"><span><i class="legend-dot ours"></i>RapidDOC</span><span><i class="legend-dot refactor"></i>Refactor</span><span><i class="legend-dot no-reuse"></i>No reuse</span></div><div id="ablation-chart" aria-live="polite"></div><div class="chart-summary"><div><span class="summary-label">RapidDOC</span><strong id="ablation-summary">0.055 ms</strong></div><div><span class="summary-label">Refactor</span><strong class="summary-secondary" id="refactor-time">0.19 ms</strong></div><div><span class="summary-label">No reuse</span><strong class="summary-secondary" id="no-reuse-time">53.8 ms</strong></div><span id="ablation-comparison" class="sr-only">RapidDOC backward time on CartPole</span></div></div>
+        <p class="figure-note">Milliseconds, logarithmic axis. Means and standard deviations across 32 instances per task; each instance uses a median over repeated measurements. All methods use a 10<sup>−6</sup> target-residual tolerance. Lower is better.</p>
+      </div>
+      <div class="learning-header reveal"><h3>Comparable learning.<br><span class="dim">Lower computation time.</span></h3><p>Reuse preserves the observed learning behavior across open-loop and state-coupled closed-loop experiments.</p></div>
+      <div class="learning-figure reveal"><div class="tabs learning-tabs" role="tablist" aria-label="Learning experiments"><button role="tab" id="learn-open" aria-selected="true" aria-controls="learning-panel" data-learning="0">Open-loop</button><button role="tab" id="learn-closed" aria-selected="false" aria-controls="learning-panel" data-learning="1" tabindex="-1">Closed-loop</button><button role="tab" id="learn-vehicle" aria-selected="false" aria-controls="learning-panel" data-learning="2" tabindex="-1">Figure-eight</button></div><figure id="learning-panel" role="tabpanel" aria-labelledby="learn-open"><a id="learning-full" href="assets/fig3_open_loop_imitation_learning.png" target="_blank" rel="noopener" aria-label="Open full-resolution experimental figure"><div class="paper-figure"><img id="learning-image" src="assets/fig3_open_loop_imitation_learning.png" width="1785" height="600" loading="lazy" alt="Open-loop learning loss and forward and backward computation time for CartPole, Quadrotor, and Robot Arm"></div></a><figcaption id="learning-caption">Open-loop objective learning: aligned training behavior and the lowest backward time across all three tasks. Original paper, Fig. 3.</figcaption></figure></div>
+      <div class="closed-loop-results reveal"><div><p class="mini-label">CLOSED-LOOP TOTAL TIME</p><h3>Faster at every<br>MPC step.</h3><p class="muted">Median forward + backward solver-call time, compared with the fastest competing pipeline per task.</p></div><div class="time-table"><div class="time-row table-head"><span>Task</span><span>RapidDOC</span><span>Best baseline</span><span>Reduction</span></div><div class="time-row"><span>CartPole</span><strong>0.91 ms</strong><span>5.40 ms</span><b>83.1%</b></div><div class="time-row"><span>Quadrotor</span><strong>1.86 ms</strong><span>5.34 ms</span><b>65.2%</b></div><div class="time-row"><span>Robot Arm</span><strong>1.60 ms</strong><span>2.69 ms</span><b>40.5%</b></div><p class="figure-note">Best baseline: acados for each task. Timings from Table I; percentages rounded. See the paper for the full comparison with SafePDP and CasADi.</p></div></div>
+    </section>
+
+    <section class="hardware-section section" id="hardware" aria-labelledby="hardware-title">
+      <div class="section-intro reveal"><p class="eyebrow">04 / ON THE PHYSICAL VEHICLE</p><h2 id="hardware-title">Learn an objective.<br><span class="gradient">See the difference.</span></h2><p class="lede">A figure-eight tracking controller learns four objective weights in simulation, then runs on the onboard ROS system at 10 Hz without further parameter updates.</p></div>
+      <div class="rmse-comparison reveal"><div><span>BEFORE LEARNING</span><strong>22.75<small> cm</small></strong></div><span class="rmse-arrow" aria-hidden="true">→</span><div><span>AFTER LEARNING</span><strong class="gradient">6.09<small> cm</small></strong></div></div>
+      <div class="full-video reveal"><video id="full-demo" controls playsinline preload="none" poster="assets/vehicle-poster.jpg"><source src="assets/rapidoc-vehicle.mp4" type="video/mp4">Your browser does not support embedded video. <a href="assets/rapidoc-vehicle.mp4">Download the physical vehicle demonstration</a>.</video></div>
+      <div class="video-caption"><span><i class="line-red"></i> Before learning</span><span><i class="line-green"></i> Reference</span><span><i class="line-blue"></i> After learning</span><a href="https://youtu.be/b53gcrjdS7c" target="_blank" rel="noopener">Watch on YouTube ↗</a></div>
+      <p class="figure-note hardware-note">Recorded vehicle motion is shown at 5× speed. Median position RMSE is computed from three complete runs before learning and two after learning. This small-scale experiment demonstrates hardware deployment potential, rather than statistical superiority.</p>
+      <div class="hardware-details reveal"><div><strong>500</strong><span>training epochs in simulation</span></div><div><strong>10<span> Hz</span></strong><span>physical MPC execution</span></div><div><strong>3.17<span> ms</span></strong><span>median onboard solver-call time during learning</span></div></div>
+      <p class="figure-note">Onboard learning timing includes forward and backward calls, with forward recomputation in the backward pass; acados takes 4.44 ms under the same measurement protocol (Table II). It is not the deployment control-loop period.</p>
+    </section>
+
+    <section class="details-section section" id="details" aria-labelledby="details-title">
+      <div class="details-intro reveal"><p class="eyebrow">A CLOSER LOOK</p><h2 id="details-title">The details matter.</h2></div>
+      <div class="questions reveal"><details><summary>Why does direct factorization reuse need a residual check?<span aria-hidden="true">+</span></summary><p>Linearization, barrier terms, regularization, and curvature can differ between the retained forward operator and the operator defining the derivative. A cached solve is accepted only when its residual satisfies the prescribed tolerance under the target adjoint equation.</p></details><details><summary>Does the cache change which derivative is computed?<span aria-hidden="true">+</span></summary><p>The target operator remains fixed and defines the backward equation. The cache supplies an adjoint candidate and a fixed right preconditioner. GMRES is applied to the prescribed target system when the candidate is insufficient.</p></details><details><summary>Which solution map does the paper differentiate?<span aria-hidden="true">+</span></summary><p>The analysis considers the selected local solution of a fixed-barrier reformulation, with a nonsingular optimality Jacobian. These are finite-barrier sensitivities. Active-set changes and adaptive reuse in embedded online differentiation are directions for future work.</p></details><details><summary>What can I reproduce from the code?<span aria-hidden="true">+</span></summary><p>The repository includes the native factor-reuse solver, Python binding, FATROP cache integration, saved-case adjoint examples, backward-solve comparisons, learning experiments, and vehicle deployment code. Start with the repository’s installation guide and tutorials.</p><a href="https://github.com/opt-man/RapidDOC#installation" target="_blank" rel="noopener">Installation and tutorials ↗</a></details></div>
+    </section>
+
+    <section class="citation-section section reveal" id="citation" aria-labelledby="citation-title">
+      <div class="citation-heading"><div><p class="eyebrow">BUILD ON THIS WORK</p><h2 id="citation-title">Read. Reproduce. Reuse.</h2></div><a class="button primary" href="https://github.com/opt-man/RapidDOC" target="_blank" rel="noopener">Get RapidDOC <span aria-hidden="true">↗</span></a></div>
+      <div class="citation-box"><div class="code-title"><span>BIBTEX</span><button id="copy-citation" type="button">Copy citation <span aria-hidden="true">⧉</span></button></div><pre id="citation-text">@misc{zhu2026rapidoc,
+  title  = {RapidDOC: Riccati-Preconditioned Implicit Differentiation
+            for Differentiable Optimal Control under Operator Mismatch},
+  author = {Zhu, Xiangda and Chen, Yuankun and Nie, Zifei and Chang, Yi},
+  year   = {2026},
+  note   = {Preprint},
+  url    = {https://github.com/opt-man/RapidDOC}
+}</pre><span id="copy-status" class="sr-only" role="status"></span></div>
+      <p class="citation-note">Citation information follows the supplied manuscript. <a href="assets/RapidDOC.pdf" target="_blank" rel="noopener">Download the paper ↗</a></p>
+    </section>
+  </main>
+  <dialog id="figure-dialog" class="figure-dialog" aria-labelledby="figure-dialog-caption"><div class="dialog-toolbar"><span>RESEARCH FIGURE</span><button id="close-figure" type="button" aria-label="Close full-resolution figure">Close <span aria-hidden="true">×</span></button></div><div class="dialog-image"><img id="figure-dialog-image" alt="Expanded experimental figure"></div><p id="figure-dialog-caption"></p></dialog>
+  <footer><a class="footer-brand" href="#top">RapidDOC<span>.</span></a><p>School of Artificial Intelligence<br>Jilin University, China</p><div><a href="mailto:zifei_nie@jlu.edu.cn">Contact ↗</a><a href="https://github.com/opt-man/RapidDOC" target="_blank" rel="noopener">GitHub ↗</a><a href="assets/RapidDOC.pdf" target="_blank" rel="noopener">Paper ↗</a></div><a class="back-top" href="#top">BACK TO TOP ↑</a></footer>
+  <div class="page-progress" aria-hidden="true"></div>
+</body>
+</html>
